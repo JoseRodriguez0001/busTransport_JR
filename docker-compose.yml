@@ -1,0 +1,36 @@
+version: "3.8"  # Versión del formato de docker-compose
+
+services:
+  postgres:
+    image: postgres:15  # Imagen oficial de PostgreSQL versión 15
+    container_name: busTransport_db  # Nombre del contenedor
+    environment:  # Variables de entorno que el contenedor necesita
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - bus-net
+
+
+  pgadmin:
+    image: dpage/pgadmin4:7
+    container_name: bus_pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    ports:
+      - "8081:80"
+    depends_on:
+      - postgres
+    networks:
+      - bus-net
+
+volumes:
+  postgres_data:
+
+networks:
+  bus-net:
