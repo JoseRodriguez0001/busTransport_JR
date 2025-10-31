@@ -51,5 +51,4 @@ public class Bus {
         this.seats.add(seat);
         seat.setBus(this);
     }
-
 }

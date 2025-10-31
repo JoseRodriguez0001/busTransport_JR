@@ -6,7 +6,6 @@ import lombok.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-
 @Entity
 @Table(name = "passengers")
 @Getter

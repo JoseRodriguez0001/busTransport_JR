@@ -2,7 +2,6 @@ package com.unimag.bustransport.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;

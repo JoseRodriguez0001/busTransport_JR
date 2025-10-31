@@ -1,6 +1,5 @@
 package com.unimag.bustransport.domain.entities;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +8,6 @@ import org.hibernate.annotations.Type;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-
 
 @Entity
 @Table(name = "fare_rules")
@@ -29,7 +27,7 @@ public class FareRule {
     private Map<String, Double> discounts = new HashMap<>();
 
     @Enumerated(EnumType.STRING)
-    private DinamyPricing dinamyPricing;
+    private dinamyPricing dinamyPricing;
 
     @ManyToOne
     @JoinColumn(name = "route_id",foreignKey = @ForeignKey(name = "fk_farerule_route"))
@@ -42,7 +40,7 @@ public class FareRule {
     @JoinColumn(name = "to_stop_id",foreignKey = @ForeignKey(name = "fk_farerule_tostop"))
     private Stop toStop;
 
-    public enum DinamyPricing{
+    public enum dinamyPricing{
         ON,
         OFF
     }

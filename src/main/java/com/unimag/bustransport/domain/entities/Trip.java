@@ -2,8 +2,6 @@ package com.unimag.bustransport.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.boot.jaxb.mapping.JaxbUserTypeRegistration;
-
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
