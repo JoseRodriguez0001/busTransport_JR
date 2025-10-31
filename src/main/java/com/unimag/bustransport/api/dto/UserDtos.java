@@ -1,8 +1,7 @@
 package com.unimag.bustransport.api.dto;
 
 import com.unimag.bustransport.domain.entities.Role;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.*;
 
 import java.io.Serializable;
 import java.time.OffsetDateTime;
@@ -12,18 +11,25 @@ public class UserDtos {
     public record UserCreateRequest(
             @NotBlank String name,
             @NotBlank @Email String email,
+            @Pattern(regexp = "^\\+?[0-9]{10,15}$")
             @NotBlank String phone,
-            @NotBlank String password
-            ) implements Serializable{}
-    public record UserUpdateRequest(String name,
-                                    String phone,
-                                    String password) implements Serializable{}
-    public record UserResponse(Long id,
-                               String name,
-                               String email,
-                               String phone,
-                               Role role,
-                               String status,
-                               List<PassengerDtos.PassengerResponse> passengers
-                               ) implements Serializable{}
+            @Size(min = 8, max = 100)
+            @NotBlank String password,
+            @NotNull Role role
+    ) implements Serializable{}
+    public record UserUpdateRequest(
+            String name,
+            String phone,
+            String password
+    ) implements Serializable{}
+    public record UserResponse(
+            Long id,
+            String name,
+            String email,
+            String phone,
+            Role role,
+            String status,
+            List<PassengerDtos.PassengerResponse> passengers,
+            OffsetDateTime createAt
+    ) implements Serializable{}
 }

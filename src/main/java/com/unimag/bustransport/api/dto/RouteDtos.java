@@ -11,8 +11,8 @@ public class RouteDtos {
             @NotBlank String name,
             @NotBlank String origin,
             @NotBlank String destination,
-            Double dictanceKm,
-            Double durationMin
+            Double distanceKm,
+            Integer durationMin
     ) implements Serializable {}
     public record RouteUpdateRequest(
             String name,
