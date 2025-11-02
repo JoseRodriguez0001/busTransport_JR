@@ -1,6 +1,5 @@
 package com.unimag.bustransport.domain.entities;
 
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import com.vladmihalcea.hibernate.type.json.JsonType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -9,7 +8,6 @@ import org.hibernate.annotations.Type;
 import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
-
 
 @Entity
 @Table(name = "fare_rules")

@@ -2,7 +2,6 @@ package com.unimag.bustransport.domain.entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.stereotype.Service;
 
 @Entity
 @Table(name = "seats")
