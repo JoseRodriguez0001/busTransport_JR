@@ -48,4 +48,9 @@ public class Purchase {
     public enum PaymentStatus {
         PENDING, CONFIRMED, CANCELLED
     }
+
+    public void addTicket(Ticket ticket) {
+        this.tickets.add(ticket);
+        ticket.setPurchase(this);
+    }
 }
