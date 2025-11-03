@@ -9,6 +9,5 @@ import java.util.Optional;
 public interface PassengerRepository extends JpaRepository<Passenger,Long> {
     List<Passenger> findByUserId(Long userId);
     Optional<Passenger> findByDocumentNumber(String documentNumber);
-    Optional<Passenger> findByEmail(String email);
     boolean existsByDocumentNumber(String documentNumber);
 }

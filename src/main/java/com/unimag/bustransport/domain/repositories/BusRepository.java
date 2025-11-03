@@ -16,4 +16,7 @@ public interface BusRepository extends JpaRepository<Bus,Long> {
             "LEFT JOIN FETCH b.seats " +
             "WHERE b.id = :busId")
             Optional<Bus> findByIdWithSeats(@Param("busId") Long busId);
+    void changeBusStatus(Long busId, Bus.Status status);
+
+
 }

@@ -3,6 +3,7 @@ package com.unimag.bustransport.domain.repositories;
 import com.unimag.bustransport.domain.entities.Role;
 import com.unimag.bustransport.domain.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
@@ -13,5 +14,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByPhone(String phone);
     boolean existsByEmail(String email);
     List<User> findByRoleAndStatus(Role role, User.Status status);
+    @Query("SELECT u FROM User u WHERE u.role = :role AND u.status = 'ACTIVE'")
     List<User> findActiveUsersByRole(@Param("role") Role role);
 }

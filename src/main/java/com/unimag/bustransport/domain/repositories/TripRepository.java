@@ -13,15 +13,17 @@ import java.util.Optional;
 
 public interface TripRepository extends JpaRepository<Trip,Long> {
     List<Trip> findByRouteIdAndDateAndStatus(Long routeId, Date date, Trip.Status status);
-    @Query( "SELECT t " +
+
+    @Query("SELECT t " +
             "FROM Trip t " +
-            "WHERE t.route.id = :routeId " +
+            "WHERE t.route.origin = :origin " +
+            "      AND t.route.destination = :destination " +
             "      AND t.date = :date " +
-            "      AND t.status IN :statuses")
-            List<Trip> findAvailableTrips(
-                    @Param("routeId") Long routeId,
-                    @Param("date") LocalDate date,
-                    @Param("statuses") List<Trip.Status> statuses);
+            "      AND t.status = 'SCHEDULED'")
+    List<Trip> findTripsByOriginAndDestination(@Param("origin") String origin,
+                                               @Param("destination") String destination,
+                                               @Param("date") LocalDate date);
+
     List<Trip> findByStatus(Trip.Status status);
     List<Trip> findByBusIdAndStatus(Long busId, Trip.Status status);
     // viajes que estan proximos a salir.
@@ -38,6 +40,8 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             "LEFT JOIN FETCH b.seats " +
             "WHERE t.id = :tripId")
             Optional<Trip> findByIdWithBusAndSeats(@Param("tripId") Long tripId);
-
-
+    @Query("SELECT COUNT(ti)" +
+            "FROM Ticket ti " +
+            "WHERE ti.trip.id = :tripId AND ti.status = 'SOLD'")
+    Long countSoldTickets(Long tripId);
 }

@@ -12,4 +12,7 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
 
     @Query("SELECT s FROM SeatHold s WHERE s.expiresAt < CURRENT_TIMESTAMP AND s.status = 'HOLD'")
     List<SeatHold> findExpiredHolds();
+
+    //pendiente verificar si añade un estado usado(markholdasused), y en tocket estadp pendiente para confirmarlo como vendido, o simplemente crearlo al confirmar
+    // pendiente verificar si hay hold activo para un asiento en un tramo para ver si el asiento está disponible.
 }
