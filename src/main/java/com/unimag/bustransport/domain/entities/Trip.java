@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "trips")
@@ -17,14 +19,6 @@ public class Trip {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "route_id",foreignKey = @ForeignKey(name = "fk_trip_route"))
-    private Route route;
-
-    @ManyToOne
-    @JoinColumn(name = "bus_id",foreignKey = @ForeignKey(name = "fk_trip_bus"))
-    private Bus bus;
-
     @Column(nullable = false)
     private LocalDate date;
     @Column(nullable = false, name = "departure_at")
@@ -33,6 +27,38 @@ public class Trip {
     private OffsetDateTime arrivalAt;
     private Double overbookingPercent;
     private Status status = Status.SCHEDULED;
+
+    @ManyToOne
+    @JoinColumn(name = "route_id",foreignKey = @ForeignKey(name = "fk_trip_route"))
+    private Route route;
+
+    @ManyToOne
+    @JoinColumn(name = "bus_id",foreignKey = @ForeignKey(name = "fk_trip_bus"))
+    private Bus bus;
+
+    @OneToMany(mappedBy = "trip",  fetch = FetchType.LAZY)
+    private List<SeatHold> seatHolds= new ArrayList<>();
+
+    public void addSeatHold(SeatHold seatHold) {
+        this.seatHolds.add(seatHold);
+        seatHold.setTrip(this);
+    }
+
+    @OneToMany(mappedBy = "trip",fetch = FetchType.LAZY)
+    private List<Ticket> tickets= new ArrayList<>();
+
+    public void addTicket(Ticket ticket) {
+        this.tickets.add(ticket);
+        ticket.setTrip(this);
+    }
+
+    @OneToMany(mappedBy = "trip", fetch = FetchType.LAZY)
+    private List<Parcel> parcels= new ArrayList<>();
+
+    public void addParcel(Parcel parcel) {
+        this.parcels.add(parcel);
+        parcel.setTrip(this);
+    }
 
     public enum Status {
         SCHEDULED,

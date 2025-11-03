@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "passengers")
@@ -32,4 +34,12 @@ public class Passenger {
     @ManyToOne
     @JoinColumn(name = "user_id",foreignKey = @ForeignKey(name = "fk_passenger_user"))
     private User user;
+
+    @OneToMany(mappedBy = "passenger", fetch = FetchType.LAZY)
+    private List<Ticket> tickets= new ArrayList<>();
+
+    public void addTicket(Ticket ticket){
+        tickets.add(ticket);
+        ticket.setPassenger(this);
+    }
 }

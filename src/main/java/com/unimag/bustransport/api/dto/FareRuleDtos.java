@@ -16,12 +16,12 @@ public class FareRuleDtos {
             @NotNull BigDecimal basePrice,
             Map<@Pattern(regexp = "^(CHILD|STUDENT|SENIOR)$") String,
             @Min(value = 0) @Max(value = 100) Double>  discounts,
-            @NotNull FareRule.DinamyPricing dinamycPricing
+            @NotNull FareRule.dinamyPricing dinamycPricing
             ) implements Serializable {}
     public record FareRuleUpdateRequest(
             BigDecimal basePrice,
             Map<String, Double> discounts,
-            FareRule.DinamyPricing dinamycPricing
+            FareRule.dinamyPricing dinamycPricing
     ) implements Serializable {}
     public record FareRuleResponse(
             Long id,
