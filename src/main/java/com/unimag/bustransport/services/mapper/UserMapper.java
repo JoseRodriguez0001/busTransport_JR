@@ -9,13 +9,30 @@ public interface UserMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "passwordHash", source = "password")
-    @Mapping(target = "passengers", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "passengers", ignore = true)
+    @Mapping(target = "assignmentsAsDriver", ignore = true)
+    @Mapping(target = "assignmentsAsDispatcher", ignore = true)
+    @Mapping(target = "seatHolds", ignore = true)
+    @Mapping(target = "purchases", ignore = true)
     User toEntity(UserDtos.UserCreateRequest request);
 
-    @Mapping(target = "createAt", source = "createdAt")
+    @Mapping(target = "createdAt", source = "createdAt")
+    @Mapping(target = "role", source = "role")
+    @Mapping(target = "status", source = "status")
+    @Mapping(target = "assignmentsAsDriver", ignore = true)
+    @Mapping(target = "assignmentsAsDispatcher", ignore = true)
+    @Mapping(target = "seatHolds", ignore = true)
+    @Mapping(target = "purchases", ignore = true)
     UserDtos.UserResponse toResponse(User user);
 
     @Mapping(source = "password", target = "passwordHash")
+    @Mapping(target = "role", ignore = true)
+    @Mapping(target = "status", ignore = true)
+    @Mapping(target = "assignmentsAsDriver", ignore = true)
+    @Mapping(target = "assignmentsAsDispatcher", ignore = true)
+    @Mapping(target = "seatHolds", ignore = true)
+    @Mapping(target = "purchases", ignore = true)
     void updateEntityFromRequest(UserDtos.UserUpdateRequest request, @MappingTarget User user);
 }

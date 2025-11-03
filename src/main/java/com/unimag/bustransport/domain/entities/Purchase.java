@@ -41,6 +41,11 @@ public class Purchase {
     @OneToMany(mappedBy = "purchase", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<Ticket> tickets = new ArrayList<>();
 
+    public void addTicket(Ticket ticket) {
+        tickets.add(ticket);
+        ticket.setPurchase(this);
+    }
+
     public enum PaymentMethod {
         CASH, TRANSFER, QR, CARD
     }
@@ -49,8 +54,4 @@ public class Purchase {
         PENDING, CONFIRMED, CANCELLED
     }
 
-    public void addTicket(Ticket ticket) {
-        this.tickets.add(ticket);
-        ticket.setPurchase(this);
-    }
 }
