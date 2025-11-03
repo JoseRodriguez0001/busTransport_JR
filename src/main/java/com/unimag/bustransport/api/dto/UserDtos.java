@@ -1,6 +1,7 @@
 package com.unimag.bustransport.api.dto;
 
 import com.unimag.bustransport.domain.entities.Role;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.*;
 
 import java.io.Serializable;
@@ -29,7 +30,7 @@ public class UserDtos {
             String phone,
             Role role,
             String status,
-            List<PassengerDtos.PassengerResponse> passengers,
+            @Nullable List<PassengerDtos.PassengerResponse> passengers,
             OffsetDateTime createAt
     ) implements Serializable{}
 }
