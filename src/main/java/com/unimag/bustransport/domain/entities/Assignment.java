@@ -22,7 +22,7 @@ public class Assignment {
     @Column(name = "assigned_at", nullable = false)
     private OffsetDateTime assignedAt = OffsetDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne
     @JoinColumn(name = "trip_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_assignment_trip"))
     private Trip trip;

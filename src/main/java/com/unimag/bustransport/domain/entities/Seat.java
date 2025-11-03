@@ -12,15 +12,15 @@ public class Seat {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "bus_id",foreignKey = @ForeignKey(name = "fk_seat_bus"))
-    private Bus bus;
-
     @Column(nullable = false)
     private String number;
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Type type;
+
+    @ManyToOne
+    @JoinColumn(name = "bus_id",foreignKey = @ForeignKey(name = "fk_seat_bus"))
+    private Bus bus;
 
     public enum Type{
         STANDARD,

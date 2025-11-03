@@ -41,6 +41,38 @@ public class User {
         passenger.setUser(this);
     }
 
+    @OneToMany(mappedBy = "driver", fetch = FetchType.LAZY)
+    private List<Assignment> assignmentsAsDriver = new ArrayList<>();
+
+    @OneToMany(mappedBy = "dispatcher", fetch = FetchType.LAZY)
+    private List<Assignment> assignmentsAsDispatcher = new ArrayList<>();
+
+    public void addAssignmentAsDriver(Assignment assignment) {
+        this.assignmentsAsDriver.add(assignment);
+        assignment.setDriver(this);
+    }
+
+    public void addAssignmentAsDispatcher(Assignment assignment) {
+        this.assignmentsAsDispatcher.add(assignment);
+        assignment.setDispatcher(this);
+    }
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<SeatHold> seatHolds = new ArrayList<>();
+
+    public void addSeatHold(SeatHold seatHold) {
+        this.seatHolds.add(seatHold);
+        seatHold.setUser(this);
+    }
+
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+    private List<Purchase> purchases = new ArrayList<>();
+
+    public void addPurchase(Purchase purchase) {
+        this.purchases.add(purchase);
+        purchase.setUser(this);
+    }
+
     public enum Status {
         ACTIVE,
         INACTIVE,
