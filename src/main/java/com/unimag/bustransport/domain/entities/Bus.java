@@ -31,7 +31,7 @@ public class Bus {
     private List<String> amenities = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
-    private Status  Status;
+    private Status  status;
     public enum Status {
         ACTIVE,
         IN_REPAIR,
