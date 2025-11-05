@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface TripRepository extends JpaRepository<Trip,Long> {
-    List<Trip> findByRouteIdAndDateAndStatus(Long routeId, Date date, Trip.Status status);
+    List<Trip> findByRouteIdAndDateAndStatus(Long routeId, LocalDate date, Trip.Status status);
 
     @Query("SELECT t " +
             "FROM Trip t " +
