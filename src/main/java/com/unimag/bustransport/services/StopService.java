@@ -10,5 +10,5 @@ public interface StopService {
     void deleteStop(Long id);
     List<StopDtos.StopResponse> getStopsByRouteId(Long id);
     StopDtos.StopResponse getStopById(Long id);
-    List<StopDtos.StopResponse> getStopsBetween(Long from, Long to);
+    List<StopDtos.StopResponse> getStopsBetween(Long routeId,Integer fromOrder, Integer toOrder);
 }

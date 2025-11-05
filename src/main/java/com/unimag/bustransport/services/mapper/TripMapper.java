@@ -43,6 +43,7 @@ public interface TripMapper {
     @Mapping(target = "tickets", ignore = true)
     @Mapping(target = "parcels", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(TripDtos.TripUpdateRequest request, @MappingTarget Trip trip);
 }
 

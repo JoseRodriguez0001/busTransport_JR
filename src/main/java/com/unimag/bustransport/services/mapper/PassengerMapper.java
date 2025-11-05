@@ -14,7 +14,7 @@ public interface PassengerMapper {
     Passenger toEntity(PassengerDtos.PassengerCreateRequest request);
 
 
-    @Mapping(source = "fullName", target = "fullname")
+    @Mapping(source = "fullName", target = "fullName")
     @Mapping(source = "documentType", target = "documentType")
     @Mapping(source = "documentNumber", target = "documentNumber")
     @Mapping(source = "birthDate", target = "birthDate")
@@ -25,6 +25,7 @@ public interface PassengerMapper {
     @Mapping(target = "createAt", ignore = true)
     @Mapping(target = "tickets", ignore = true)
     @Mapping(target = "user", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(PassengerDtos.PassengerUpdateRequest request, @MappingTarget Passenger passenger);
 }
 

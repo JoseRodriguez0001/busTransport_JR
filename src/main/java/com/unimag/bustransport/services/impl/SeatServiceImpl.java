@@ -23,17 +23,22 @@ public class SeatServiceImpl implements SeatService {
     }
 
     @Override
-    public List<SeatDtos.SeatResponse> getSeatsByUserId(Long id) {
+    public List<SeatDtos.SeatResponse> getSeatsByBusId(Long busId) {
         return List.of();
     }
 
     @Override
-    public List<SeatDtos.SeatResponse> getSeatsByType(Seat.Type seatType) {
+    public List<SeatDtos.SeatResponse> getSeatsByBusIdAndType(Long busId,Seat.Type seatType) {
         return List.of();
     }
 
     @Override
-    public boolean isSeatAvailable(Long tripId, String seatNumber, Long from, Long to) {
+    public SeatDtos.SeatResponse getSeatById(Long id) {
+        return null;
+    }
+
+    @Override
+    public boolean isSeatAvailable(Long tripId, String seatNumber, Long fromStopId, Long toStopId) {
         return false;
     }
 

@@ -11,8 +11,9 @@ public interface SeatService {
     SeatDtos.SeatResponse createSeat(SeatDtos.SeatCreateRequest request);
     void updateSeat(Long id,SeatDtos.SeatUpdateRequest request);
     void deleteSeat(Long id);
-    List<SeatDtos.SeatResponse> getSeatsByUserId(Long id);
-    List<SeatDtos.SeatResponse> getSeatsByType(Seat.Type seatType);
-    boolean isSeatAvailable(Long tripId, String seatNumber, Long from, Long to);
+    List<SeatDtos.SeatResponse> getSeatsByBusId(Long busId);
+    List<SeatDtos.SeatResponse> getSeatsByBusIdAndType(Long busId, Seat.Type seatType);
+    SeatDtos.SeatResponse getSeatById(Long id);
+    boolean isSeatAvailable(Long tripId, String seatNumber, Long fromStopId, Long toStopId);
     void confirmSeatReservation(Long tripId, List<String> seatNumbers, Long purchaseId); // pendiente verificar en seathold
 }

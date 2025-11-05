@@ -11,7 +11,7 @@ public interface TripService {
     void updateTrip(Long id,TripDtos.TripUpdateRequest request);
     void deleteTrip(Long id);
     List<TripDtos.TripResponse> getTrips(String origin, String destination, LocalDate date);
-    List<TripDtos.TripResponse> getTripDetails(Long tripId);
-    SeatDtos.SeatResponse getSeats(Long tripId);
+    TripDtos.TripResponse getTripDetails(Long tripId);
+    List<SeatDtos.SeatResponse> getSeats(Long tripId);
     Long getTripStatistics(Long tripId);
 }

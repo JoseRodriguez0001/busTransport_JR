@@ -18,5 +18,6 @@ public interface SeatMapper {
     @Mapping(target = "occupied", ignore = true)
     SeatDtos.SeatResponse toResponse(Seat seat);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(SeatDtos.SeatUpdateRequest request, @MappingTarget Seat seat);
 }
