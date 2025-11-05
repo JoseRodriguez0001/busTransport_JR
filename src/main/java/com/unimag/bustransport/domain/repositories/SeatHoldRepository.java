@@ -6,7 +6,9 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
     List<SeatHold> findByTripId(Long tripId);
@@ -26,5 +28,38 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
 """)
     int markHoldsAsUsed(@Param("tripId") Long tripId,
                         @Param("seatNumbers") List<String> seatNumbers);
-    // pendiente verificar si hay hold activo para un asiento en un tramo para ver si el asiento está disponible.
+
+    // Buscar holds activos para asientos específicos en un trip
+    List<SeatHold> findByTripIdAndSeatNumberInAndStatus(
+            Long tripId,
+            List<String> seatNumbers,
+            SeatHold.Status status
+    );
+
+    // Buscar holds activos de un usuario en un trip
+    List<SeatHold> findByTripIdAndUserIdAndStatus(
+            Long tripId,
+            Long userId,
+            SeatHold.Status status
+    );
+
+    // Verificar si existe hold activo para un asiento
+    boolean existsByTripIdAndSeatNumberAndStatusAndExpiresAtAfter(
+            Long tripId,
+            String seatNumber,
+            SeatHold.Status status,
+            OffsetDateTime now
+    );
+
+    // Buscar hold activo para un asiento específico
+    @Query("SELECT sh FROM SeatHold sh " +
+            "WHERE sh.trip.id = :tripId " +
+            "AND sh.seatNumber = :seatNumber " +
+            "AND sh.status = 'HOLD' " +
+            "AND sh.expiresAt > :now")
+    Optional<SeatHold> findActiveHold(
+            @Param("tripId") Long tripId,
+            @Param("seatNumber") String seatNumber,
+            @Param("now") OffsetDateTime now
+    );
 }
