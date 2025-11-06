@@ -10,7 +10,13 @@ import java.util.Optional;
 
 public interface StopRepository extends JpaRepository<Stop,Long> {
     List<Stop> findByRouteIdOrderByOrderAsc(Long routeId);
-    Optional<Stop> findByRouteIdAndOrder(Long routeId, Integer order);
+    // Buscar stop por trip y order
+    @Query("SELECT s FROM Stop s " +
+            "WHERE s.route.id = :routeId AND s.order = :order")
+    Optional<Stop> findByRouteIdAndOrder(
+            @Param("routeId") Long routeId,
+            @Param("order") Integer order
+    );
     boolean existsByRouteIdAndId(Long routeId, Long stopId);
     @Query( "SELECT s " +
             "FROM Stop s " +
