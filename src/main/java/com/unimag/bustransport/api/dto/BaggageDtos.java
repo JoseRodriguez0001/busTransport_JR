@@ -9,14 +9,12 @@ import java.math.BigDecimal;
 public class BaggageDtos {
     public record BaggageCreateRequest(
             @NotNull Long ticketId,
-            @Positive Double weightKg,
-            @NotNull BigDecimal fee,
+            @NotNull @Positive Double weightKg,
             String tagCode
     ) implements Serializable {}
 
     public record BaggageUpdateRequest(
-            Double weightKg,
-            BigDecimal fee,
+            @Positive Double weightKg,
             String tagCode
     ) implements Serializable {}
 
