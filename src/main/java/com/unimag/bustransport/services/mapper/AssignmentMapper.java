@@ -21,11 +21,9 @@ public interface AssignmentMapper {
     @Mapping(source = "trip.route.destination", target = "trip.destination")
     @Mapping(source = "trip.departureAt", target = "trip.departureAt")
     @Mapping(source = "driver.id", target = "driver.id")
-    @Mapping(source = "driver.username", target = "driver.username")
-    @Mapping(source = "driver.fullName", target = "driver.fullName")
+    @Mapping(source = "driver.name", target = "driver.name")
     @Mapping(source = "dispatcher.id", target = "dispatcher.id")
-    @Mapping(source = "dispatcher.username", target = "dispatcher.username")
-    @Mapping(source = "dispatcher.fullName", target = "dispatcher.fullName")
+    @Mapping(source = "dispatcher.name", target = "dispatcher.name")
     AssignmentDtos.AssignmentResponse toResponse(Assignment assignment);
 
     //“Si en el objeto de origen (source) hay un campo con valor null,
