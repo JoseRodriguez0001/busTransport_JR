@@ -9,9 +9,9 @@ import java.util.List;
 public interface RouteService {
     RouteDtos.RouteResponse createRoute(RouteDtos.RouteCreateRequest request);
     void updateRoute(Long id,RouteDtos.RouteUpdateRequest request);
-    void deleteRoute(@Param("id") Long id);
+    void deleteRoute(Long id);
     List<RouteDtos.RouteResponse> getAllRoutes();
-    RouteDtos.RouteResponse getRouteById(@Param("id") Long id);
-    List<StopDtos.StopResponse>  getStopsByRouteId(@Param("id") Long id);
+    RouteDtos.RouteResponse getRouteById(Long id);
+    List<StopDtos.StopResponse>  getStopsByRouteId(Long id);
     List<RouteDtos.RouteResponse> searchRoutes(String origin, String destination);
 }

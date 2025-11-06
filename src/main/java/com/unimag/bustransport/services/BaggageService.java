@@ -7,7 +7,8 @@ import java.util.List;
 
 public interface BaggageService {
     BaggageDtos.BaggageResponse registerBaggage(BaggageDtos.BaggageCreateRequest request);
-    void updateBaggage(BaggageDtos.BaggageUpdateRequest request);
+    void updateBaggage(Long id,BaggageDtos.BaggageUpdateRequest request);
     List<BaggageDtos.BaggageResponse> getBaggageByTicket(Long ticketId);
     BigDecimal calculateBaggageFee(double weightKg);
+    void deleteBaggage(Long id);
 }
