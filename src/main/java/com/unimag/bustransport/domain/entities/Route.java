@@ -16,7 +16,7 @@ public class Route {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String code;
     private String name;
     @Column(nullable = false)
@@ -25,7 +25,7 @@ public class Route {
     private String destination;
     @Column(nullable = false,name = "distance_km")
     private Double distanceKm;
-    @Column(name = "duration_min")
+    @Column(nullable = false,name = "duration_min")
     private Integer durationMin;
 
     @OneToMany(mappedBy = "route", fetch = FetchType.LAZY)

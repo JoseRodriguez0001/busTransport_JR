@@ -10,10 +10,16 @@ import java.util.Optional;
 
 public interface RouteRepository extends JpaRepository<Route,Long> {
     Optional<Route> findByCode(String code);
-    List<Route> finByOriginAndDestination(String origin, String destination);
+
+    List<Route> findByOriginAndDestination(String origin, String destination);
+
+    List<Route> findByOrigin(String origin);
+
+    List<Route> findByDestination(String destination);
     @Query( "SELECT r " +
             "FROM Route r " +
             "WHERE r.origin = :origin OR r.destination = :destination")
     List<Route> findByOriginOrDestination(@Param("origin") String origin, @Param("destination") String destination);
 
+    boolean existsByCode(String code);
 }

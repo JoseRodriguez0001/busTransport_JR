@@ -11,39 +11,28 @@ import java.util.List;
 import java.util.Optional;
 
 public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
-    List<SeatHold> findByTripId(Long tripId);
+
     List<SeatHold> findByUserId(Long userId);
 
-    @Query("SELECT s FROM SeatHold s WHERE s.expiresAt < CURRENT_TIMESTAMP AND s.status = 'HOLD'")
-    List<SeatHold> findExpiredHolds();
+    List<SeatHold> findByTripIdAndUserIdAndStatusAndExpiresAtAfter(
+            Long tripId,
+            Long userId,
+            SeatHold.Status status,
+            OffsetDateTime now
+    );
 
-    //pendiente verificar si añade un estado usado(markholdasused), y en tocket estadp pendiente para confirmarlo como vendido, o simplemente crearlo al confirmar
-    @Modifying
-    @Query("""
-    UPDATE SeatHold h
-    SET h.status = 'USED'
-    WHERE h.trip.id = :tripId 
-      AND h.seatNumber IN :seatNumbers 
-      AND h.status = 'HOLD'
-""")
-    int markHoldsAsUsed(@Param("tripId") Long tripId,
-                        @Param("seatNumbers") List<String> seatNumbers);
+    List<SeatHold> findByTripIdAndStatusAndExpiresAtAfter(
+            Long tripId,
+            SeatHold.Status status,
+            OffsetDateTime now
+    );
 
-    // Buscar holds activos para asientos específicos en un trip
     List<SeatHold> findByTripIdAndSeatNumberInAndStatus(
             Long tripId,
             List<String> seatNumbers,
             SeatHold.Status status
     );
 
-    // Buscar holds activos de un usuario en un trip
-    List<SeatHold> findByTripIdAndUserIdAndStatus(
-            Long tripId,
-            Long userId,
-            SeatHold.Status status
-    );
-
-    // Verificar si existe hold activo para un asiento
     boolean existsByTripIdAndSeatNumberAndStatusAndExpiresAtAfter(
             Long tripId,
             String seatNumber,
@@ -51,15 +40,20 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
             OffsetDateTime now
     );
 
-    // Buscar hold activo para un asiento específico
-    @Query("SELECT sh FROM SeatHold sh " +
-            "WHERE sh.trip.id = :tripId " +
-            "AND sh.seatNumber = :seatNumber " +
-            "AND sh.status = 'HOLD' " +
-            "AND sh.expiresAt > :now")
-    Optional<SeatHold> findActiveHold(
+    @Query("SELECT s FROM SeatHold s WHERE s.expiresAt < CURRENT_TIMESTAMP AND s.status = 'HOLD'")
+    List<SeatHold> findExpiredHolds();
+
+    @Modifying
+    @Query("""
+        DELETE FROM SeatHold h
+        WHERE h.trip.id = :tripId 
+          AND h.seatNumber IN :seatNumbers 
+          AND h.user.id = :userId
+          AND h.status = 'HOLD'
+    """)
+    int deleteByTripIdAndSeatNumbersAndUserId(
             @Param("tripId") Long tripId,
-            @Param("seatNumber") String seatNumber,
-            @Param("now") OffsetDateTime now
+            @Param("seatNumbers") List<String> seatNumbers,
+            @Param("userId") Long userId
     );
 }
