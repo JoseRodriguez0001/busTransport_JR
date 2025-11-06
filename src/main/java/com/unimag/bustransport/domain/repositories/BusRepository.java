@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface BusRepository extends JpaRepository<Bus,Long> {
     Optional<Bus> findByPlate(String plate);
-    List<Bus> findByStatus(String status);
+    List<Bus> findByStatus(Bus.Status status);
     @Query("SELECT b " +
             "FROM Bus b " +
             "LEFT JOIN FETCH b.seats " +
