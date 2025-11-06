@@ -24,9 +24,8 @@ public class AssignmentDtos {
             TripSummary trip,
             UserSummary driver,
             UserSummary dispatcher
-    ) implements Serializable
-    {
-        public record TripSummary(Long id, String origin, String destination, OffsetDateTime departureAt) implements Serializable {}
-        public record UserSummary(Long id, String username, String fullName) implements Serializable {}
+    ) {
+        public record TripSummary(Long id, String origin, String destination, OffsetDateTime departureAt) {}
+        public record UserSummary(Long id, String name) {}
     }
 }
