@@ -12,9 +12,10 @@ import java.util.Optional;
 public interface TicketRepository extends JpaRepository<Ticket,Long> {
     List<Ticket> findByTripId(Long tripId);
     List<Ticket> findByPassengerId(Long passengerId);
+    // Buscar tickets por compra
     List<Ticket> findByPurchaseId(Long purchaseId);
     Optional<Ticket> findByQrCode(String qrCode);
-    List<Ticket> findByStatus(String status);
+    List<Ticket> findByStatus(Ticket.Status status);
 
     @Query("SELECT COUNT(t) FROM Ticket t WHERE t.trip.id = :tripId AND t.status = 'SOLD'")
     long countSoldByTrip(@Param("tripId") Long tripId);
@@ -27,21 +28,32 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
                                       @Param("fromIndex") Integer fromIndex,
                                       @Param("toIndex") Integer toIndex,
                                       @Param("seatNumber") String seatNumber);
-    /*
-    @Modifying
-    @Query("""
-    UPDATE Ticket t
-    SET t.status = 'SOLD',
-        t.purchase.id = :purchaseId
-    WHERE t.trip.id = :tripId
-      AND t.seatNumber IN :seatNumbers
-      AND t.status = 'PENDING'
-    """)
-    int confirmPendingTickets(
-            @Param("tripId") Long tripId,
-            @Param("seatNumbers") List<String> seatNumbers,
-            @Param("purchaseId") Long purchaseId
-    );*/
 
+    // Verificar si un asiento ya está vendido en un trip
+    boolean existsByTripIdAndSeatNumberAndStatus(
+            Long tripId,
+            String seatNumber,
+            Ticket.Status status
+    );
+
+    // Buscar tickets por trip y números de asiento
+    List<Ticket> findByTripIdAndSeatNumberIn(Long tripId, List<String> seatNumbers);
+
+    // Buscar tickets vendidos para un tramo específico (verificar solapamiento)
+    @Query("SELECT t FROM Ticket t " +
+            "WHERE t.trip.id = :tripId " +
+            "AND t.seatNumber = :seatNumber " +
+            "AND t.status = 'SOLD' " +
+            "AND (" +
+            "  (t.fromStop.order <= :fromOrder AND t.toStop.order > :fromOrder) OR " +
+            "  (t.fromStop.order < :toOrder AND t.toStop.order >= :toOrder) OR " +
+            "  (t.fromStop.order >= :fromOrder AND t.toStop.order <= :toOrder)" +
+            ")")
+    List<Ticket> findOverlappingTickets(
+            @Param("tripId") Long tripId,
+            @Param("seatNumber") String seatNumber,
+            @Param("fromOrder") Integer fromOrder,
+            @Param("toOrder") Integer toOrder
+    );
 
 }
