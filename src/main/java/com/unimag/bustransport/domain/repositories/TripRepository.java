@@ -44,4 +44,5 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             "FROM Ticket ti " +
             "WHERE ti.trip.id = :tripId AND ti.status = 'SOLD'")
     Long countSoldTickets(Long tripId);
+
 }
