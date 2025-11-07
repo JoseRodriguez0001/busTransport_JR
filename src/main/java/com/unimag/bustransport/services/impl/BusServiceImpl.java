@@ -31,9 +31,9 @@ public class BusServiceImpl implements BusService {
     public BusDtos.BusResponse createBus(BusDtos.BusCreateRequest request) {
         // Validar que la placa sea única
         repository.findByPlate(request.plate()).ifPresent(existingBus -> {
-            log.warn("Intento de crear bus con placa duplicada: {}", request.plate());
+            log.warn("IAttempt to create a bus with a duplicate license plate: {}", request.plate());
             throw new DuplicateResourceException(
-                    String.format("Ya existe un bus con la placa '%s'", request.plate()));
+                    String.format("Bus already exists with plate '%s'", request.plate()));
 
         });
 
@@ -42,7 +42,7 @@ public class BusServiceImpl implements BusService {
 
         // Guardar bus
         Bus savedBus = repository.save(bus);
-        log.info("Bus creado exitosamente con ID: {} y placa: {}", savedBus.getId(), savedBus.getPlate());
+        log.info("Bus created succesfully with  ID: {} and plate: {}", savedBus.getId(), savedBus.getPlate());
 
         return mapper.toResponse(savedBus);
     }
@@ -82,9 +82,9 @@ public class BusServiceImpl implements BusService {
     public BusDtos.BusResponse getBus(Long id) {
         Bus bus = repository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Bus no encontrado con ID: {}", id);
+                    log.error("Bus not found with ID: {}", id);
                     return new NotFoundException(
-                            String.format("Bus con ID %d no encontrado", id)
+                            String.format("Bus with ID %d not found", id)
                     );
                 });
 
@@ -104,9 +104,9 @@ public class BusServiceImpl implements BusService {
     public List<SeatDtos.SeatResponse> getAllSeatsByBusId(Long id) {
         Bus bus = repository.findByIdWithSeats(id)
                 .orElseThrow(() -> {
-                    log.error("Bus no encontrado con ID: {}", id);
+                    log.error("Bus not found with ID: {}", id);
                     return new NotFoundException(
-                            String.format("Bus con ID %d no encontrado", id)
+                            String.format("Bus with ID %d not found", id)
                     );
                 });
 

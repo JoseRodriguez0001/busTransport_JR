@@ -27,44 +27,44 @@ public class PassengerServiceImpl implements PassengerService {
     public PassengerDtos.PassengerResponse createPassenger(PassengerDtos.PassengerCreateRequest request) {
         Passenger passenger = mapper.toEntity(request);//creando entidad
         if (request.userId() != null) {
-            log.debug("Asociando pasajero al usuario ID: {}", request.userId());
+            log.debug("Associating passenger with user ID: {}", request.userId());
             User user = userRepository.findById(request.userId())
                     .orElseThrow(() -> {return new NotFoundException(String.format("Usuario con ID %d no encontrado", request.userId())
                         );
                     });
             passenger.setUser(user);
         } else {
-            log.debug("Creando pasajero sin usuario asociado (compra como invitado)");
+            log.debug("Creating a passenger without an associated user (guest purchase)");
         }
 
         passenger.setCreateAt(OffsetDateTime.now());//fecha de creacion
         Passenger savedPassenger = repository.save(passenger);//guardando
-        log.info("Passenger creado");
+        log.info("Passenger created");
         return mapper.toResponse(savedPassenger);//retorna informacion del passenger
     }
 
     @Override
     public void updatePassenger(Long id, PassengerDtos.PassengerUpdateRequest request) {
         Passenger passenger = repository.findById(id).orElseThrow(() -> {
-            log.error("Pasajero no encontrado ");
+            log.error("Passenger not found ");
             return new NotFoundException(
-                    String.format("Pasajero con ID %d no encontrado", id)
+                    String.format("Passenger with ID %d not found", id)
             );
         });
 
         mapper.updateEntityFromRequest(request, passenger);
         repository.save(passenger);
-        log.info("Pasajero actualizado");
+        log.info("Passenger updated");
     }
 
     @Override
     public void deletePassenger(Long id) {
         if (!repository.existsById(id)) {
-            log.error("Pasajero no encontrado");
-            throw new NotFoundException(String.format("Pasajero no encontrado"));
+            log.error("Pasajero not found");
+            throw new NotFoundException(String.format("Passenger not found"));
         }
         repository.deleteById(id);
-        log.info("Pasajero eliminado");
+        log.info("Passenger deleted");
     }
 
     @Override
@@ -79,7 +79,7 @@ public class PassengerServiceImpl implements PassengerService {
     @Transactional(readOnly = true)
     public PassengerDtos.PassengerResponse finByDocumentNumber(String documentNumber) {
         Passenger passenger = repository.findByDocumentNumber(documentNumber).
-                orElseThrow(() -> new NotFoundException(String.format("Pasajero no encontrado")));
+                orElseThrow(() -> new NotFoundException(String.format("Passenger not found")));
         return mapper.toResponse(passenger);
     }
 
@@ -87,7 +87,7 @@ public class PassengerServiceImpl implements PassengerService {
     @Transactional(readOnly = true)
     public PassengerDtos.PassengerResponse getPassengerById(Long id) {
         Passenger passenger = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("Pasajero no encontrado")));
+                .orElseThrow(() -> new NotFoundException(String.format("Passenger not found")));
         return mapper.toResponse(passenger);
     }
 }

@@ -17,10 +17,6 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-/**
-  Este servicio es usado principalmente por PurchaseService.
-
- */
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,81 +30,71 @@ public class TicketServiceImpl implements TicketService {
     private final PurchaseRepository purchaseRepository;
     private final TicketMapper ticketMapper;
 
-    /**
-     Crea un nuevo ticket en el sistema.
-      Valida todas las reglas de negocio críticas antes de crear el ticket.
-
-      VALIDACIONES:
-      - Trip, Passenger, Stops y Purchase deben existir
-      - fromStop y toStop deben pertenecer a la ruta del Trip
-      - fromStop.order debe ser menor que toStop.order
-      - El asiento NO debe estar ocupado en ningún tramo solapado
-     */
     @Override
     public TicketDtos.TicketResponse createTicket(TicketDtos.TicketCreateRequest request) {
 
         // 1. Validar existencia de entidades relacionadas
         Trip trip = tripRepository.findById(request.tripId())
                 .orElseThrow(() -> {
-                    log.error("Trip no encontrado con ID: {}", request.tripId());
+                    log.error("Trip not found with ID: {}", request.tripId());
                     return new NotFoundException(
-                            String.format("Trip con ID %d no encontrado", request.tripId())
+                            String.format("Trip with ID %d not found", request.tripId())
                     );
                 });
 
         Passenger passenger = passengerRepository.findById(request.passengerId())
                 .orElseThrow(() -> {
-                    log.error("Pasajero no encontrado con ID: {}", request.passengerId());
+                    log.error("Passenger not found with ID: {}", request.passengerId());
                     return new NotFoundException(
-                            String.format("Pasajero con ID %d no encontrado", request.passengerId())
+                            String.format("Passenger with ID %d not found", request.passengerId())
                     );
                 });
 
         Stop fromStop = stopRepository.findById(request.fromStopId())
                 .orElseThrow(() -> {
-                    log.error("Parada de origen no encontrada con ID: {}", request.fromStopId());
+                    log.error("Origin stop not found with ID: {}", request.fromStopId());
                     return new NotFoundException(
-                            String.format("Parada con ID %d no encontrada", request.fromStopId())
+                            String.format("Stop with ID %d not found", request.fromStopId())
                     );
                 });
 
         Stop toStop = stopRepository.findById(request.toStopId())
                 .orElseThrow(() -> {
-                    log.error("Parada de destino no encontrada con ID: {}", request.toStopId());
+                    log.error("Destination stop not found with ID: {}", request.toStopId());
                     return new NotFoundException(
-                            String.format("Parada con ID %d no encontrada", request.toStopId())
+                            String.format("Stop with ID %d not found", request.toStopId())
                     );
                 });
 
         Purchase purchase = purchaseRepository.findById(request.purchaseId())
                 .orElseThrow(() -> {
-                    log.error("Compra no encontrada con ID: {}", request.purchaseId());
+                    log.error("Purchase not found with ID: {}", request.purchaseId());
                     return new NotFoundException(
-                            String.format("Compra con ID %d no encontrada", request.purchaseId())
+                            String.format("Purchase with ID %d not found", request.purchaseId())
                     );
                 });
 
         // 2. Validar que las paradas pertenezcan a la ruta del trip
         if (!fromStop.getRoute().getId().equals(trip.getRoute().getId())) {
-            log.error("La parada de origen no pertenece a la ruta del trip");
+            log.error("The origin stop does not belong to the trip route");
             throw new IllegalArgumentException(
-                    "La parada de origen no pertenece a la ruta del viaje"
+                    "The origin stop does not belong to the trip route"
             );
         }
 
         if (!toStop.getRoute().getId().equals(trip.getRoute().getId())) {
-            log.error("La parada de destino no pertenece a la ruta del trip");
+            log.error("The destination stop does not belong to the trip route");
             throw new IllegalArgumentException(
-                    "La parada de destino no pertenece a la ruta del viaje"
+                    "The destination stop does not belong to the trip route"
             );
         }
 
         // 3. Validar que fromStop.order < toStop.order
         if (fromStop.getOrder() >= toStop.getOrder()) {
-            log.error("El orden de la parada de origen ({}) debe ser menor que el destino ({})",
+            log.error("The order of the origin stop ({}) must be less than the destination ({})",
                     fromStop.getOrder(), toStop.getOrder());
             throw new IllegalArgumentException(
-                    "La parada de origen debe estar antes que la parada de destino en la ruta"
+                    "The origin stop must be before the destination stop on the route"
             );
         }
 
@@ -143,19 +129,14 @@ public class TicketServiceImpl implements TicketService {
 
         // 7. Guardar ticket
         Ticket savedTicket = ticketRepository.save(ticket);
-        log.info("Ticket creado exitosamente con ID: {} y QR: {}",
+        log.info("Ticket created succesfully with ID: {} y QR: {}",
                 savedTicket.getId(), savedTicket.getQrCode());
 
         return ticketMapper.toResponse(savedTicket);
     }
 
-    /**
-     * Cancela un ticket cambiando su status a CANCELLED.
-     * No elimina físicamente el registro.
-     */
     @Override
     public void deleteTicket(Long id) {
-        log.info("Cancelando ticket ID: {}", id);
 
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> {
@@ -172,18 +153,13 @@ public class TicketServiceImpl implements TicketService {
         log.info("Ticket ID: {} cancelado exitosamente", id);
     }
 
-    /**
-     * Obtiene un ticket por su identificador.
-     */
     @Override
     @Transactional(readOnly = true)
     public TicketDtos.TicketResponse getTicket(Long id) {
-        log.debug("Buscando ticket por ID: {}", id);
 
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> {
-                    log.error("Ticket no encontrado con ID: {}", id);
-                    return new NotFoundException(
+                   return new NotFoundException(
                             String.format("Ticket con ID %d no encontrado", id)
                     );
                 });
@@ -191,13 +167,9 @@ public class TicketServiceImpl implements TicketService {
         return ticketMapper.toResponse(ticket);
     }
 
-    /**
-     * Obtiene todos los tickets de un viaje específico.
-     */
     @Override
     @Transactional(readOnly = true)
     public List<TicketDtos.TicketResponse> getTicketsByTrip(Long tripId) {
-        log.debug("Buscando tickets del trip ID: {}", tripId);
 
         List<Ticket> tickets = ticketRepository.findByTripId(tripId);
 
@@ -208,13 +180,9 @@ public class TicketServiceImpl implements TicketService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Obtiene todos los tickets de una compra específica.
-     */
     @Override
     @Transactional(readOnly = true)
     public List<TicketDtos.TicketResponse> getTicketsByPurchase(Long purchaseId) {
-        log.debug("Buscando tickets de la compra ID: {}", purchaseId);
 
         List<Ticket> tickets = ticketRepository.findByPurchaseId(purchaseId);
 
@@ -225,13 +193,9 @@ public class TicketServiceImpl implements TicketService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Obtiene todos los tickets de un pasajero específico.
-     */
     @Override
     @Transactional(readOnly = true)
     public List<TicketDtos.TicketResponse> getTicketsByPassenger(Long passengerId) {
-        log.debug("Buscando tickets del pasajero ID: {}", passengerId);
 
         List<Ticket> tickets = ticketRepository.findByPassengerId(passengerId);
 
@@ -242,17 +206,11 @@ public class TicketServiceImpl implements TicketService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Genera un código QR único para un ticket existente.
-     * Útil si se necesita regenerar el QR
-     */
     @Override
     public void generateQrForTicket(Long ticketId) {
-        log.info("Generando QR para ticket ID: {}", ticketId);
 
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> {
-                    log.error("Ticket no encontrado con ID: {}", ticketId);
                     return new NotFoundException(
                             String.format("Ticket con ID %d no encontrado", ticketId)
                     );
@@ -266,18 +224,12 @@ public class TicketServiceImpl implements TicketService {
         log.info("QR generado exitosamente para ticket ID: {} - QR: {}", ticketId, newQrCode);
     }
 
-    /**
-     * Valida un código QR de ticket.
-     * Verifica que el QR exista y que el ticket tenga status SOLD
-     */
     @Override
     @Transactional(readOnly = true)
     public void validateQrForTicket(String qrCode) {
-        log.info("Validando QR: {}", qrCode);
 
         Ticket ticket = ticketRepository.findByQrCode(qrCode)
                 .orElseThrow(() -> {
-                    log.error("QR no encontrado: {}", qrCode);
                     return new NotFoundException(
                             String.format("Ticket con QR '%s' no encontrado", qrCode)
                     );
@@ -285,20 +237,14 @@ public class TicketServiceImpl implements TicketService {
 
         // Validar que el status sea SOLD
         if (ticket.getStatus() != Ticket.Status.SOLD) {
-            log.warn("Intento de validar QR de ticket con status {}: {}",
-                    ticket.getStatus(), qrCode);
             throw new InvalidCredentialsException(
                     String.format("El ticket no está activo (status: %s)", ticket.getStatus())
             );
         }
 
-        log.info("QR validado exitosamente para ticket ID: {}", ticket.getId());
+        log.info("QR validated successfully for ticket ID: {}", ticket.getId());
     }
 
-    /**
-     * Genera un código QR único usando UUID.
-     * Formato: TICKET-{UUID}
-     */
     private String generateUniqueQrCode() {
         return "TICKET-" + UUID.randomUUID().toString().toUpperCase();
     }

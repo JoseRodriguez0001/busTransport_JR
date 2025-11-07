@@ -93,7 +93,6 @@ public class SeatServiceImpl implements SeatService {
                     });
         }
 
-        // Actualizar
         seatMapper.updateEntityFromRequest(request, seat);
 
         repository.save(seat);
@@ -285,9 +284,6 @@ public class SeatServiceImpl implements SeatService {
         // Aquí solo confirmamos que los holds se marcaron correctamente
     }
 
-    /**
-     * Valida el formato del número de asiento
-     */
     private void validateSeatNumber(String number) {
         if (number == null || number.isBlank()) {
             throw new IllegalArgumentException("Seat number cannot be null or empty");
