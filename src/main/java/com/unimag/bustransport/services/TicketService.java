@@ -4,11 +4,6 @@ import com.unimag.bustransport.api.dto.TicketDtos;
 
 import java.util.List;
 
-/*
-  Servicio para la gestión de tickets.
-  Este servicio es usado principalmente por PurchaseService para crear tickets
-  como parte del proceso de compra.
- */
 public interface TicketService {
 
     TicketDtos.TicketResponse createTicket(TicketDtos.TicketCreateRequest request);
