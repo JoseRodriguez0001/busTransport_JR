@@ -9,10 +9,19 @@ import java.util.List;
 import java.util.Map;
 
 public interface FareRuleService {
-    FareRuleDtos.FareRuleResponse createFareRule(FareRuleDtos.FareRuleCreateRequest  request);
-    void updateFareRule(Long id,FareRuleDtos.FareRuleUpdateRequest  request);
+
+    FareRuleDtos.FareRuleResponse createFareRule(FareRuleDtos.FareRuleCreateRequest request);
+
+    void updateFareRule(Long id, FareRuleDtos.FareRuleUpdateRequest request);
+
     void deleteFareRule(Long id);
+
     FareRuleDtos.FareRuleResponse getFareRule(Long id);
-    BigDecimal calculateFarePrice(Long routeId, Long fromId, Long toId, Passenger passenger);
+
+    List<FareRuleDtos.FareRuleResponse> getAllFareRules();
+
     List<FareRuleDtos.FareRuleResponse> getFareRulesByRouteId(Long routeId);
+
+    BigDecimal calculatePrice(Long routeId, Long fromStopId, Long toStopId,
+                              Long passengerId, Long busId, String seatNumber);
 }

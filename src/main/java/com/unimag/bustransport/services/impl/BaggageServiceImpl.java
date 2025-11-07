@@ -26,7 +26,7 @@ public class BaggageServiceImpl implements BaggageService {
     private final BaggageRepository baggageRepository;
     private final TicketRepository ticketRepository;
     private final BaggageMapper baggageMapper;
-    private final ConfigService configService;
+    private final ConfigService configService; //revisar por que se llama a la interfaz y no a la implementacion
 
     @Override
     public BaggageDtos.BaggageResponse registerBaggage(BaggageDtos.BaggageCreateRequest request) {
@@ -38,6 +38,7 @@ public class BaggageServiceImpl implements BaggageService {
         Baggage baggage = baggageMapper.toEntity(request);
         baggage.setTicket(ticket);
         baggage.setFee(fee);
+        baggage.setTagCode(generateTagCode(ticket.getId()));
 
         baggageRepository.save(baggage);
         return baggageMapper.toResponse(baggage);
@@ -93,5 +94,10 @@ public class BaggageServiceImpl implements BaggageService {
         Baggage baggage = baggageRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Equipaje no encontrado"));
         baggageRepository.delete(baggage);
+    }
+
+
+    private String generateTagCode(Long ticketId) {
+        return String.format("BAG-%08d-%d", ticketId, System.currentTimeMillis() % 100000);
     }
 }

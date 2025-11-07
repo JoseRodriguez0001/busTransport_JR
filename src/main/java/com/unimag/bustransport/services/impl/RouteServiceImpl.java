@@ -43,27 +43,25 @@ public class RouteServiceImpl implements RouteService {
         Route route = routeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Ruta no encontrada"));
 
-//        if (request.name() != null) {
-//            route.setName(request.name());
-//        }
-//
-//        if (request.origin() != null) {
-//            route.setOrigin(request.origin());
-//        }
-//
-//        if (request.destination() != null) {
-//            route.setDestination(request.destination());
-//        }
-//
-//        if (request.distanceKm() != null) {
-//            route.setDistanceKm(request.distanceKm());
-//        }
-//
-//        if (request.durationMin() != null) {
-//            route.setDurationMin(request.durationMin());
-//        }
+        if (request.name() != null) {
+            route.setName(request.name());
+        }
 
-        routeMapper.updateEntityFromRequest(request, route);
+        if (request.origin() != null) {
+            route.setOrigin(request.origin());
+        }
+
+        if (request.destination() != null) {
+            route.setDestination(request.destination());
+        }
+
+        if (request.distanceKm() != null) {
+            route.setDistanceKm(request.distanceKm());
+        }
+
+        if (request.durationMin() != null) {
+            route.setDurationMin(request.durationMin());
+        }
 
         routeRepository.save(route);
     }
