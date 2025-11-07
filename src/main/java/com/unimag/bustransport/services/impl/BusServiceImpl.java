@@ -3,8 +3,10 @@ package com.unimag.bustransport.services.impl;
 import com.unimag.bustransport.api.dto.BusDtos;
 import com.unimag.bustransport.api.dto.SeatDtos;
 import com.unimag.bustransport.domain.entities.Bus;
+import com.unimag.bustransport.domain.entities.Seat;
 import com.unimag.bustransport.domain.entities.Trip;
 import com.unimag.bustransport.domain.repositories.BusRepository;
+import com.unimag.bustransport.domain.repositories.SeatRepository;
 import com.unimag.bustransport.exception.DuplicateResourceException;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.BusService;
@@ -15,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,8 +28,12 @@ import java.util.stream.Collectors;
 public class BusServiceImpl implements BusService {
 
     private final BusRepository repository;
+    private final SeatRepository seatRepository;
     private final BusMapper mapper;
     private final SeatMapper seatMapper;
+
+    private static final int COLUMS = 4;
+    private static final char[] COLUMN_LETTERS = {'A','B','C','D'};
     @Override
     public BusDtos.BusResponse createBus(BusDtos.BusCreateRequest request) {
         // Validar que la placa sea única
@@ -37,14 +44,44 @@ public class BusServiceImpl implements BusService {
 
         });
 
-
+        if (request.capacity() % COLUMS != 0) {
+            log.warn("capacity {} no es multiplo de {}",request.capacity(),COLUMS);
+            throw new IllegalArgumentException(
+                    String.format("capacity must be multiplo de %d", COLUMS)
+            );
+        }
         Bus bus = mapper.toEntity(request);
 
         // Guardar bus
         Bus savedBus = repository.save(bus);
         log.info("Bus created succesfully with  ID: {} and plate: {}", savedBus.getId(), savedBus.getPlate());
 
+        createSeatsForBus(savedBus);
         return mapper.toResponse(savedBus);
+    }
+
+    private void createSeatsForBus(Bus bus) {
+        int rows = bus.getCapacity()/COLUMS;
+
+        List<Seat> seats =  new ArrayList<>();
+        for (int row=1;row<=rows;row++) {
+            for (int col=0;col<COLUMS;col++) {
+                String seatNumber= row + String.valueOf(COLUMN_LETTERS[col]);
+
+                Seat.Type seatType = (row==1)? Seat.Type.PREFERENTIAL : Seat.Type.STANDARD;
+
+                Seat seat = Seat.builder()
+                        .number(seatNumber)
+                        .type(seatType)
+                        .bus(bus)
+                        .build();
+
+                seats.add(seat);
+            }
+        }
+
+        seatRepository.saveAll(seats);
+        log.info("Seats created succesfully");
     }
 
     @Override
