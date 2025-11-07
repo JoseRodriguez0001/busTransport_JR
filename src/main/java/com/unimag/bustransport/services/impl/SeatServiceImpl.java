@@ -281,8 +281,6 @@ public class SeatServiceImpl implements SeatService {
                 );
             }
         }
-
-        //marcar los holds como expirados?
         // Los tickets deberían crearse en el PurchaseService o mediante el TicketService
         // Aquí solo confirmamos que los holds se marcaron correctamente
     }

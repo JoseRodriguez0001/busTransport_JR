@@ -29,4 +29,7 @@ public interface SeatHoldService {
     void validateActiveHolds(Long tripId, List<String> seatNumbers, Long userId);
 
     OffsetDateTime calculateExpirationTime();
+
+    boolean hasOverlappingHold(Long tripId, String seatNumber, Integer fromStopOrder, Integer toStopOrder);
+
 }

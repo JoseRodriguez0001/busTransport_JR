@@ -164,6 +164,16 @@ public class SeatHoldServiceImpl implements SeatHoldService {
         return OffsetDateTime.now().plusMinutes(holdTimeMinutes);
     }
 
+    @Override
+    public boolean hasOverlappingHold(Long tripId, String seatNumber, Integer fromStopOrder, Integer toStopOrder) {
+        return seatHoldRepository.existsByTripIdAndSeatNumberAndStatusAndExpiresAtAfter(
+                tripId,
+                seatNumber,
+                SeatHold.Status.HOLD,
+                OffsetDateTime.now()
+        );
+    }
+
     private void validateHoldsExist(List<SeatHold> holds, List<String> seatNumbers) {
         if (holds.isEmpty()) {
             throw new IllegalStateException("No se encontraron reservas activas para los asientos especificados");
