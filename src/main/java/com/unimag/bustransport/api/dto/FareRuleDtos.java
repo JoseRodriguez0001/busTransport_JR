@@ -15,14 +15,14 @@ public class FareRuleDtos {
             @DecimalMin(value = "0.01", message = "Base price must be greater than 0")
             @NotNull BigDecimal basePrice,
             Map<String, @DecimalMin(value = "0.0") @DecimalMax(value = "1.0") Double> discounts,
-            @NotNull FareRule.DynamycPricing dynamicPricing
+            @NotNull FareRule.DynamicPricing dynamicPricing
     ) implements Serializable {}
 
     public record FareRuleUpdateRequest(
             @DecimalMin(value = "0.01", message = "Base price must be greater than 0")
             BigDecimal basePrice,
             Map<String, @DecimalMin(value = "0.0") @DecimalMax(value = "1.0") Double> discounts,
-            FareRule.DynamycPricing dynamicPricing
+            FareRule.DynamicPricing dynamicPricing
     ) implements Serializable {}
 
     public record FareRuleResponse(

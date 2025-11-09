@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 
 public class ParcelDtos {
     public record ParcelCreateRequest(
-            @NotBlank String code,
             @NotNull BigDecimal price,
             @NotBlank String senderName,
             String senderPhone,
@@ -19,16 +18,15 @@ public class ParcelDtos {
             Long tripId
     ) implements Serializable {}
 
+    //por si se equivocan ingresando los datos en la terminal
     public record ParcelUpdateRequest(
-            BigDecimal price,
-            String status,
-            String proofPhotoUrl,
-            String deliveryOtp,
             String senderName,
             String senderPhone,
             String receiverName,
             String receiverPhone,
-            Long tripId
+            BigDecimal price,
+            Long fromStopId,
+            Long toStopId
     ) implements Serializable {}
 
     public record ParcelResponse(
