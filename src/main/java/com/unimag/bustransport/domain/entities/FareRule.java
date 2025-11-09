@@ -27,7 +27,7 @@ public class FareRule {
     private Map<String, Double> discounts = new HashMap<>();
 
     @Enumerated(EnumType.STRING)
-    private DynamycPricing dynamycPricing;
+    private DynamicPricing dynamicPricing;
 
     @ManyToOne
     @JoinColumn(name = "route_id",foreignKey = @ForeignKey(name = "fk_farerule_route"))
@@ -40,7 +40,7 @@ public class FareRule {
     @JoinColumn(name = "to_stop_id",foreignKey = @ForeignKey(name = "fk_farerule_tostop"))
     private Stop toStop;
 
-    public enum DynamycPricing{
+    public enum DynamicPricing{
         ON,
         OFF
     }

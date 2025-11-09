@@ -18,5 +18,5 @@ public interface FareRuleRepository extends JpaRepository<FareRule,Long> {
             "      AND fr.fromStop.order <= :fromOrder " +
             "      AND fr.toStop.order >= :toOrder")
     List<FareRule> findApplicableFares(@Param("routeId") Long routeId, @Param("fromOrder") Integer fromOrder, @Param("toOrder") Integer toOrder);
-    List<FareRule> findByRouteIdAndDynamycPricing(Long routeId, FareRule.DynamycPricing dynamycPricing);
+    List<FareRule> findByRouteIdAndDynamicPricing(Long routeId, FareRule.DynamicPricing dynamycPricing);
 }

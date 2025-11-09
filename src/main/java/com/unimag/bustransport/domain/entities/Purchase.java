@@ -36,9 +36,6 @@ public class Purchase {
     @Column(name = "payment_reference")
     private String paymentReference;
 
-    @Column(name = "metadata_json", columnDefinition = "TEXT")
-    private String metadataJson;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_purchase_user"))

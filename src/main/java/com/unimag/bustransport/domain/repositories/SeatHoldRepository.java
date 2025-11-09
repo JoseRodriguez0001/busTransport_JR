@@ -56,5 +56,11 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
             @Param("userId") Long userId
     );
 
+    List<SeatHold> findByTripIdAndSeatNumberInAndUserId(
+            Long tripId,
+            List<String> seatNumbers,
+            Long userId
+    );
+
     List<SeatHold> findByTripIdAndUserIdAndStatus(Long tripId, Long userId, SeatHold.Status status);
 }

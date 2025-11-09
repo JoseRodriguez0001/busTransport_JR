@@ -15,4 +15,9 @@ public interface ParcelRepository extends JpaRepository<Parcel,Long> {
 
     @Query(value = "SELECT * FROM parcels WHERE status = 'IN_TRANSIT' ORDER BY id DESC", nativeQuery = true)
     List<Parcel> findInTransitNative();
+
+    List<Parcel> findByReceiverPhone(String receiverPhone);
+    List<Parcel> findByTripIdAndStatus(Long tripId, Parcel.Status status);
+
+    boolean existsByCode(String code);
 }
