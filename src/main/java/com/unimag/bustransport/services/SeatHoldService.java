@@ -22,8 +22,6 @@ public interface SeatHoldService {
 
     boolean isSeatOnHold(Long tripId, String seatNumber);
 
-    int deleteHoldsByTripAndSeats(Long tripId, List<String> seatNumbers, Long userId);
-
     int expireOldHolds();
 
     void validateActiveHolds(Long tripId, List<String> seatNumbers, Long userId);

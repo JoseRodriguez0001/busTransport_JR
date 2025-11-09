@@ -10,9 +10,11 @@ import com.unimag.bustransport.services.TicketService;
 import com.unimag.bustransport.services.mapper.TicketMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -29,6 +31,8 @@ public class TicketServiceImpl implements TicketService {
     private final StopRepository stopRepository;
     private final PurchaseRepository purchaseRepository;
     private final TicketMapper ticketMapper;
+
+    private static final int TICKET_CLEANUP_MINUTES = 15;
 
     @Override
     public TicketDtos.TicketResponse createTicket(TicketDtos.TicketCreateRequest request) {
@@ -98,7 +102,7 @@ public class TicketServiceImpl implements TicketService {
             );
         }
 
-        // Verificar disponibilidad del asiento en el tramo
+        // 4. Verificar disponibilidad del asiento en el tramo (solo SOLD)
         List<Ticket> overlappingTickets = ticketRepository.findOverlappingTickets(
                 request.tripId(),
                 request.seatNumber(),
@@ -122,15 +126,14 @@ public class TicketServiceImpl implements TicketService {
         ticket.setFromStop(fromStop);
         ticket.setToStop(toStop);
         ticket.setPurchase(purchase);
-        ticket.setStatus(Ticket.Status.SOLD);
+        ticket.setStatus(Ticket.Status.PENDING);  // Crear en PENDING
 
-        // 6. Generar QR único
-        ticket.setQrCode(generateUniqueQrCode());
+        // 6. NO generar QR todavía (se genera al confirmar purchase)
 
         // 7. Guardar ticket
         Ticket savedTicket = ticketRepository.save(ticket);
-        log.info("Ticket created succesfully with ID: {} y QR: {}",
-                savedTicket.getId(), savedTicket.getQrCode());
+        log.info("Ticket created successfully with ID: {} in PENDING status",
+                savedTicket.getId());
 
         return ticketMapper.toResponse(savedTicket);
     }
@@ -159,7 +162,7 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket ticket = ticketRepository.findById(id)
                 .orElseThrow(() -> {
-                   return new NotFoundException(
+                    return new NotFoundException(
                             String.format("Ticket con ID %d no encontrado", id)
                     );
                 });
@@ -243,6 +246,26 @@ public class TicketServiceImpl implements TicketService {
         }
 
         log.info("QR validated successfully for ticket ID: {}", ticket.getId());
+    }
+
+// Limpiar tickets PENDING antiguos
+    @Override
+    @Scheduled(cron = "0 */5 * * * *")  // Cada 5 minutos
+    public int expireOldTickets() {
+        OffsetDateTime cutoffTime = OffsetDateTime.now().minusMinutes(TICKET_CLEANUP_MINUTES);
+
+        List<Ticket> expiredTickets = ticketRepository.findExpiredPendingTickets(cutoffTime);
+
+        if (expiredTickets.isEmpty()) {
+            return 0;
+        }
+
+        ticketRepository.deleteAll(expiredTickets);
+
+        log.info("Cleaned up {} expired PENDING tickets (older than {} minutes)",
+                expiredTickets.size(), TICKET_CLEANUP_MINUTES);
+
+        return expiredTickets.size();
     }
 
     private String generateUniqueQrCode() {

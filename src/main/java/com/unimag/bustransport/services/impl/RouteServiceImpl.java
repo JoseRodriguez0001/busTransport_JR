@@ -10,10 +10,9 @@ import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.RouteService;
 import com.unimag.bustransport.services.mapper.RouteMapper;
 import com.unimag.bustransport.services.mapper.StopMapper;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.BadRequestException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;

@@ -21,4 +21,6 @@ public interface TicketService {
     void generateQrForTicket(Long ticketId);
 
     void validateQrForTicket(String qrCode);
+
+    int expireOldTickets();
 }

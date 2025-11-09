@@ -23,5 +23,5 @@ public interface FareRuleService {
     List<FareRuleDtos.FareRuleResponse> getFareRulesByRouteId(Long routeId);
 
     BigDecimal calculatePrice(Long routeId, Long fromStopId, Long toStopId,
-                              Long passengerId, Long busId, String seatNumber);
+                              Long passengerId, Long busId, String seatNumber, Long TripId);
 }

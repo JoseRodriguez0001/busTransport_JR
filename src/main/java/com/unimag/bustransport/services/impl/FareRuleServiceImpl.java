@@ -1,6 +1,5 @@
 package com.unimag.bustransport.services.impl;
 
-import aj.org.objectweb.asm.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unimag.bustransport.api.dto.FareRuleDtos;
 import com.unimag.bustransport.domain.entities.*;
@@ -30,8 +29,9 @@ public class FareRuleServiceImpl implements FareRuleService {
     private final StopRepository stopRepository;
     private final PassengerRepository passengerRepository;
     private final SeatRepository seatRepository;
+    private final TicketRepository ticketRepository;
+    private final BusRepository busRepository;
     private final FareRuleMapper fareRuleMapper;
-    private final ObjectMapper objectMapper;
 
     @Override
     public FareRuleDtos.FareRuleResponse createFareRule(FareRuleDtos.FareRuleCreateRequest request) {
@@ -82,7 +82,7 @@ public class FareRuleServiceImpl implements FareRuleService {
         }
 
         if (request.dynamicPricing() != null) {
-            fareRule.setDynamycPricing(FareRule.DynamycPricing.valueOf(String.valueOf(request.dynamicPricing()));
+            fareRule.setDynamicPricing(request.dynamicPricing());
         }
 
         fareRuleRepository.save(fareRule);
@@ -146,7 +146,9 @@ public class FareRuleServiceImpl implements FareRuleService {
     @Override
     @Transactional(readOnly = true)
     public BigDecimal calculatePrice(Long routeId, Long fromStopId, Long toStopId,
-                                     Long passengerId, Long busId, String seatNumber) {
+                                     Long passengerId, Long busId, String seatNumber, Long tripId) {
+
+        // 1. Obtener FareRule
         FareRule fareRule = fareRuleRepository
                 .findByRouteIdAndFromStopIdAndToStopId(routeId, fromStopId, toStopId)
                 .orElseThrow(() -> new NotFoundException(
@@ -157,6 +159,7 @@ public class FareRuleServiceImpl implements FareRuleService {
         BigDecimal basePrice = fareRule.getBasePrice();
         log.info("Base price for route {}: {}", routeId, basePrice);
 
+        // 2. Calcular descuento por edad
         Passenger passenger = passengerRepository.findById(passengerId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Passenger with ID %d not found", passengerId)
@@ -165,6 +168,7 @@ public class FareRuleServiceImpl implements FareRuleService {
         BigDecimal ageDiscount = calculateAgeDiscount(passenger.getBirthDate(), fareRule);
         log.info("Age discount for passenger {}: {}", passengerId, ageDiscount);
 
+        // 3. Calcular recargo por asiento preferencial
         Seat seat = seatRepository.findByBusIdAndNumber(busId, seatNumber)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Seat %s not found in bus %d", seatNumber, busId)
@@ -173,47 +177,85 @@ public class FareRuleServiceImpl implements FareRuleService {
         BigDecimal seatSurcharge = calculateSeatSurcharge(seat, basePrice);
         log.info("Seat surcharge for {} seat: {}", seat.getType(), seatSurcharge);
 
+        // 4. Aplicar descuento
         BigDecimal priceAfterDiscount = basePrice.multiply(
                 BigDecimal.ONE.subtract(ageDiscount)
         );
 
-        BigDecimal finalPrice = priceAfterDiscount.add(seatSurcharge);
+        // 5.  Calcular recargo dinámico (si está activado)
+        BigDecimal dynamicSurcharge = BigDecimal.ZERO;
+        if (fareRule.getDynamicPricing() == FareRule.DynamicPricing.ON) {
+            dynamicSurcharge = calculateDynamicSurcharge(tripId, busId, basePrice);
+            log.info("Dynamic pricing surcharge: {} (fare rule has dynamic pricing enabled)", dynamicSurcharge);
+        }
 
-        log.info("Final price calculated: base={}, afterDiscount={}, withSurcharge={}",
-                basePrice, priceAfterDiscount, finalPrice);
+        // 6. Precio final
+        BigDecimal finalPrice = priceAfterDiscount
+                .add(seatSurcharge)
+                .add(dynamicSurcharge);
+
+        log.info("Final price calculated: base={}, afterDiscount={}, withSurcharge={}, withDynamic={}",
+                basePrice, priceAfterDiscount, priceAfterDiscount.add(seatSurcharge), finalPrice);
 
         return finalPrice;
     }
 
+    // Calcular recargo dinámico basado en ocupación
+    private BigDecimal calculateDynamicSurcharge(Long tripId, Long busId, BigDecimal basePrice) {
+        Bus bus = busRepository.findById(busId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Bus with ID %d not found", busId)
+                ));
+
+        // Contar tickets SOLD para este trip
+        long soldSeats = ticketRepository.countSoldByTrip(tripId);
+        double occupancyRate = (double) soldSeats / bus.getCapacity();
+
+        log.debug("Trip {} occupancy: {} / {} = {}%",
+                tripId, soldSeats, bus.getCapacity(), (int)(occupancyRate * 100));
+
+        BigDecimal surcharge = BigDecimal.ZERO;
+
+        // Recargo por ocupación
+        if (occupancyRate >= 0.85) {
+            // Ocupación >= 85% → +20%
+            surcharge = basePrice.multiply(new BigDecimal("0.20"));
+            log.info("High occupancy ({}%) surcharge applied: +20%", (int)(occupancyRate * 100));
+        } else if (occupancyRate >= 0.70) {
+            // Ocupación >= 70% → +10%
+            surcharge = basePrice.multiply(new BigDecimal("0.10"));
+            log.info("Medium occupancy ({}%) surcharge applied: +10%", (int)(occupancyRate * 100));
+        } else {
+            log.info("No dynamic surcharge applied (occupancy: {}%)", (int)(occupancyRate * 100));
+        }
+
+        return surcharge;
+    }
+
     private BigDecimal calculateAgeDiscount(LocalDate birthDate, FareRule fareRule) {
         int age = Period.between(birthDate, LocalDate.now()).getYears();
+        Map<String, Double> discounts = fareRule.getDiscounts();
 
-        try {
-            Map<String, Double> discounts = objectMapper.readValue(
-                    fareRule.getDiscounts(),
-                    new TypeReference<Map<String, Double>>() {}
-            );
-
-            Double discountValue = null;
-
-            if (age < 12) {
-                discountValue = discounts.get("child");
-            } else if (age >= 60) {
-                discountValue = discounts.get("senior");
-            } else if (age >= 12 && age < 26) {
-                discountValue = discounts.get("student");
-            }
-
-            if (discountValue != null) {
-                return BigDecimal.valueOf(discountValue);
-            }
-
-            return BigDecimal.ZERO;
-
-        } catch (Exception e) {
-            log.error("Error parsing discounts JSON: {}", fareRule.getDiscounts(), e);
+        if (discounts == null || discounts.isEmpty()) {
+            log.debug("No discounts configured for fare rule ID {}", fareRule.getId());
             return BigDecimal.ZERO;
         }
+
+        Double discountValue = null;
+
+        if (age < 12) {
+            discountValue = discounts.get("child");
+        } else if (age >= 60) {
+            discountValue = discounts.get("senior");
+        } else if (age >= 12 && age < 26) {
+            discountValue = discounts.get("student");
+        }
+
+        if (discountValue != null) {
+            return BigDecimal.valueOf(discountValue);
+        }
+
+        return BigDecimal.ZERO;
     }
 
     private BigDecimal calculateSeatSurcharge(Seat seat, BigDecimal basePrice) {

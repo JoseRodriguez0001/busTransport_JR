@@ -33,6 +33,13 @@ public class BaggageServiceImpl implements BaggageService {
         Ticket ticket = ticketRepository.findById(request.ticketId())
                 .orElseThrow(() -> new NotFoundException("Ticket no encontrado"));
 
+        // VALIDAR que el ticket esté SOLD
+        if (ticket.getStatus() != Ticket.Status.SOLD) {
+            throw new IllegalStateException(
+                    String.format("Cannot register baggage for ticket with status %s. Only SOLD tickets allowed.",
+                            ticket.getStatus())
+            );
+        }
         BigDecimal fee = calculateBaggageFee(request.weightKg());
 
         Baggage baggage = baggageMapper.toEntity(request);

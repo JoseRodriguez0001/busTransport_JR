@@ -17,7 +17,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,17 +32,18 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final PurchaseMapper purchaseMapper;
     private final SeatHoldService seatHoldService;
     private final FareRuleService fareRuleService;
-    private final BaggageService baggageService;
     private final TicketService ticketService;
-    private final ObjectMapper objectMapper;
 
     @Override
     public PurchaseDtos.PurchaseResponse createPurchase(PurchaseDtos.PurchaseCreateRequest request) {
+
+        // 1. Validar usuario
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new NotFoundException(
                         String.format("User with ID %d not found", request.userId())
                 ));
 
+        // 2. Validar que todos los tickets pertenezcan al mismo trip
         validateAllTicketsSameTrip(request.tickets());
 
         Long tripId = request.tickets().get(0).tripId();
@@ -52,46 +52,17 @@ public class PurchaseServiceImpl implements PurchaseService {
                         String.format("Trip with ID %d not found", tripId)
                 ));
 
+        // 3. Validar que los SeatHolds estén activos
         List<String> seatNumbers = request.tickets().stream()
                 .map(PurchaseDtos.PurchaseCreateRequest.TicketRequest::seatNumber)
                 .collect(Collectors.toList());
 
         seatHoldService.validateActiveHolds(tripId, seatNumbers, user.getId());
 
-        BigDecimal totalAmount = BigDecimal.ZERO;
-        List<TicketPriceInfo> ticketPrices = new ArrayList<>();
-
-        for (PurchaseDtos.PurchaseCreateRequest.TicketRequest ticketReq : request.tickets()) {
-            BigDecimal ticketPrice = fareRuleService.calculatePrice(
-                    trip.getRoute().getId(),
-                    ticketReq.fromStopId(),
-                    ticketReq.toStopId(),
-                    ticketReq.passengerId(),
-                    trip.getBus().getId(),
-                    ticketReq.seatNumber()
-            );
-
-            totalAmount = totalAmount.add(ticketPrice);
-
-            BigDecimal baggageFee = BigDecimal.ZERO;
-            if (ticketReq.baggage() != null) {
-                baggageFee = baggageService.calculateBaggageFee(ticketReq.baggage().weightKg());
-                totalAmount = totalAmount.add(baggageFee);
-            }
-
-            ticketPrices.add(new TicketPriceInfo(
-                    ticketReq.seatNumber(),
-                    ticketPrice,
-                    baggageFee
-            ));
-
-            log.info("Ticket price calculated: seat={}, price={}, baggageFee={}",
-                    ticketReq.seatNumber(), ticketPrice, baggageFee);
-        }
-
+        // 4. Crear Purchase en PENDING
         Purchase purchase = Purchase.builder()
                 .user(user)
-                .totalAmount(totalAmount)
+                .totalAmount(BigDecimal.ZERO)
                 .paymentMethod(Purchase.PaymentMethod.valueOf(request.paymentMethod()))
                 .paymentStatus(Purchase.PaymentStatus.PENDING)
                 .createdAt(OffsetDateTime.now())
@@ -99,16 +70,46 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         purchaseRepository.save(purchase);
 
-        try {
-            PurchaseMetadata metadata = new PurchaseMetadata(request.tickets(), ticketPrices);
-            purchase.setMetadataJson(objectMapper.writeValueAsString(metadata));
-            purchaseRepository.save(purchase);
-        } catch (Exception e) {
-            log.error("Error serializing purchase metadata", e);
-            throw new RuntimeException("Failed to save purchase metadata");
+        // 5. Crear Tickets en estado PENDING y calcular total
+        BigDecimal totalAmount = BigDecimal.ZERO;
+
+        for (PurchaseDtos.PurchaseCreateRequest.TicketRequest ticketReq : request.tickets()) {
+
+            // Calcular precio del ticket
+            BigDecimal ticketPrice = fareRuleService.calculatePrice(
+                    trip.getRoute().getId(),
+                    ticketReq.fromStopId(),
+                    ticketReq.toStopId(),
+                    ticketReq.passengerId(),
+                    trip.getBus().getId(),
+                    ticketReq.seatNumber(),
+                    ticketReq.tripId()
+            );
+
+            totalAmount = totalAmount.add(ticketPrice);
+
+            // Crear ticket en PENDING (sin QR todavía)
+            TicketDtos.TicketCreateRequest ticketCreateReq = new TicketDtos.TicketCreateRequest(
+                    ticketReq.seatNumber(),
+                    ticketPrice,
+                    ticketReq.tripId(),
+                    ticketReq.passengerId(),
+                    ticketReq.fromStopId(),
+                    ticketReq.toStopId(),
+                    purchase.getId()
+            );
+
+            ticketService.createTicket(ticketCreateReq);
+
+            log.info("Ticket PENDING created: seat={}, price={}",
+                    ticketReq.seatNumber(), ticketPrice);
         }
 
-        log.info("Purchase created with ID {} for user {} with total amount {}",
+        // 6. Actualizar total de la purchase (solo tickets, sin baggage)
+        purchase.setTotalAmount(totalAmount);
+        purchaseRepository.save(purchase);
+
+        log.info("Purchase created with ID {} for user {} with total amount {} (PENDING)",
                 purchase.getId(), user.getId(), totalAmount);
 
         return purchaseMapper.toResponse(purchase);
@@ -142,11 +143,14 @@ public class PurchaseServiceImpl implements PurchaseService {
 
     @Override
     public void confirmPurchase(Long purchaseId, String paymentReference) {
+
+        // 1. Obtener purchase
         Purchase purchase = purchaseRepository.findById(purchaseId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Purchase with ID %d not found", purchaseId)
                 ));
 
+        // 2. Validar estado
         if (purchase.getPaymentStatus() != Purchase.PaymentStatus.PENDING) {
             throw new IllegalStateException(
                     String.format("Cannot confirm purchase with ID %d. Current status: %s",
@@ -154,59 +158,42 @@ public class PurchaseServiceImpl implements PurchaseService {
             );
         }
 
-        PurchaseMetadata metadata;
-        try {
-            metadata = objectMapper.readValue(
-                    purchase.getMetadataJson(),
-                    PurchaseMetadata.class
-            );
-        } catch (Exception e) {
-            log.error("Error deserializing purchase metadata", e);
-            throw new RuntimeException("Failed to read purchase metadata");
-        }
-
-        List<String> seatNumbers = metadata.tickets().stream()
-                .map(PurchaseDtos.PurchaseCreateRequest.TicketRequest::seatNumber)
+        // 3. Validar que los SeatHolds TODAVÍA estén activos
+        List<String> seatNumbers = purchase.getTickets().stream()
+                .map(Ticket::getSeatNumber)
                 .collect(Collectors.toList());
 
-        Long tripId = metadata.tickets().get(0).tripId();
+        Long tripId = purchase.getTickets().get(0).getTrip().getId();
 
-        seatHoldService.validateActiveHolds(tripId, seatNumbers, purchase.getUser().getId());
-
-        purchase.setPaymentStatus(Purchase.PaymentStatus.CONFIRMED);
-        purchase.setPaymentReference(paymentReference);
-        purchaseRepository.save(purchase);
-
-        for (PurchaseDtos.PurchaseCreateRequest.TicketRequest ticketReq : metadata.tickets()) {
-            BigDecimal ticketPrice = getPriceForSeat(ticketReq.seatNumber(), metadata.ticketPrices());
-
-            TicketDtos.TicketCreateRequest ticketCreateReq = new TicketDtos.TicketCreateRequest(
-                    ticketReq.seatNumber(),
-                    ticketPrice,
-                    ticketReq.tripId(),
-                    ticketReq.passengerId(),
-                    ticketReq.fromStopId(),
-                    ticketReq.toStopId(),
-                    purchase.getId()
+        //todo averiguar por que aqui se usa try catch
+        try {
+            seatHoldService.validateActiveHolds(tripId, seatNumbers, purchase.getUser().getId());
+        } catch (Exception e) {
+            log.error("SeatHolds expired for purchase {}", purchaseId);
+            throw new IllegalStateException(
+                    "Cannot confirm purchase: seat holds have expired. Please reserve seats again."
             );
-
-            TicketDtos.TicketResponse ticket = ticketService.createTicket(ticketCreateReq);
-
-            if (ticketReq.baggage() != null) {
-                BaggageDtos.BaggageCreateRequest baggageReq = new BaggageDtos.BaggageCreateRequest(
-                        ticket.id(),
-                        ticketReq.baggage().weightKg()
-                );
-
-                baggageService.registerBaggage(baggageReq);
-            }
-
-            log.info("Ticket created with ID {} for seat {}", ticket.id(), ticketReq.seatNumber());
         }
 
+        // 4. Actualizar Purchase a CONFIRMED
+        purchase.setPaymentStatus(Purchase.PaymentStatus.CONFIRMED);
+        purchase.setPaymentReference(paymentReference);
+
+        // 5. Cambiar Tickets de PENDING a SOLD y generar QR usando TicketService
+        purchase.getTickets().forEach(ticket -> {
+            ticket.setStatus(Ticket.Status.SOLD);
+            ticketService.generateQrForTicket(ticket.getId());
+
+            log.info("Ticket ID {} changed from PENDING to SOLD with QR", ticket.getId());
+        });
+
+        purchaseRepository.save(purchase);
+
+        // 6. Eliminar SeatHolds
         seatHoldService.deleteHoldsByTripAndSeats(tripId, seatNumbers, purchase.getUser().getId());
 
-        log.info("Purchase {} confirmed with payment reference {}", purchaseId, paymentReference);
+        log.info("Purchase {} confirmed with payment reference {} and {} tickets SOLD",
+                purchaseId, paymentReference, purchase.getTickets().size());
     }
 
     @Override
@@ -231,9 +218,10 @@ public class PurchaseServiceImpl implements PurchaseService {
         purchase.setPaymentStatus(Purchase.PaymentStatus.CANCELLED);
         purchaseRepository.save(purchase);
 
+        // Cancelar tickets asociados
         if (!purchase.getTickets().isEmpty()) {
             purchase.getTickets().forEach(ticket -> {
-                ticketService.deleteTicket(ticket.getId());
+                ticket.setStatus(Ticket.Status.CANCELLED);
             });
         }
 
@@ -269,22 +257,4 @@ public class PurchaseServiceImpl implements PurchaseService {
         }
     }
 
-    private BigDecimal getPriceForSeat(String seatNumber, List<TicketPriceInfo> ticketPrices) {
-        return ticketPrices.stream()
-                .filter(info -> info.seatNumber().equals(seatNumber))
-                .findFirst()
-                .map(TicketPriceInfo::ticketPrice)
-                .orElseThrow(() -> new IllegalStateException("Price not found for seat " + seatNumber));
-    }
-
-    private record PurchaseMetadata(
-            List<PurchaseDtos.PurchaseCreateRequest.TicketRequest> tickets,
-            List<TicketPriceInfo> ticketPrices
-    ) {}
-
-    private record TicketPriceInfo(
-            String seatNumber,
-            BigDecimal ticketPrice,
-            BigDecimal baggageFee
-    ) {}
 }

@@ -5,7 +5,6 @@ import com.unimag.bustransport.domain.entities.SeatHold;
 import com.unimag.bustransport.domain.entities.Trip;
 import com.unimag.bustransport.domain.entities.User;
 import com.unimag.bustransport.domain.repositories.SeatHoldRepository;
-import com.unimag.bustransport.domain.repositories.SeatRepository;
 import com.unimag.bustransport.domain.repositories.TripRepository;
 import com.unimag.bustransport.domain.repositories.UserRepository;
 import com.unimag.bustransport.exception.NotFoundException;
@@ -13,6 +12,8 @@ import com.unimag.bustransport.services.ConfigService;
 import com.unimag.bustransport.services.SeatHoldService;
 import com.unimag.bustransport.services.mapper.SeatHoldMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -125,22 +127,22 @@ public class SeatHoldServiceImpl implements SeatHoldService {
         );
     }
 
+// Elimina holds expirados
     @Override
-    public int deleteHoldsByTripAndSeats(Long tripId, List<String> seatNumbers, Long userId) {
-        return seatHoldRepository.deleteByTripIdAndSeatNumbersAndUserId(
-                tripId,
-                seatNumbers,
-                userId
-        );
-    }
-
-    @Override
+    @Scheduled(cron = "0 */5 * * * *")  // Cada 5 minutos
     public int expireOldHolds() {
+        log.debug("Starting cleanup of expired seat holds");
+
         List<SeatHold> expiredHolds = seatHoldRepository.findExpiredHolds();
 
-        expiredHolds.forEach(hold -> hold.setStatus(SeatHold.Status.EXPIRED));
+        if (expiredHolds.isEmpty()) {
+            log.debug("No expired holds found");
+            return 0;
+        }
 
-        seatHoldRepository.saveAll(expiredHolds);
+        seatHoldRepository.deleteAll(expiredHolds);
+
+        log.info("Deleted {} expired seat holds", expiredHolds.size());
 
         return expiredHolds.size();
     }
