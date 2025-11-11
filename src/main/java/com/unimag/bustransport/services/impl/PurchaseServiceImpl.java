@@ -189,9 +189,6 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         purchaseRepository.save(purchase);
 
-        // 6. Eliminar SeatHolds
-        seatHoldService.deleteHoldsByTripAndSeats(tripId, seatNumbers, purchase.getUser().getId());
-
         log.info("Purchase {} confirmed with payment reference {} and {} tickets SOLD",
                 purchaseId, paymentReference, purchase.getTickets().size());
     }
