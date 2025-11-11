@@ -52,7 +52,7 @@ public interface FareRuleMapper {
     }
 
     @Named("enumToString")
-    default String enumToString(FareRule.DynamycPricing dynamicPricing) {
+    default String enumToString(FareRule.DynamicPricing dynamicPricing) {
         return dynamicPricing != null ? dynamicPricing.name() : null;
     }
 }

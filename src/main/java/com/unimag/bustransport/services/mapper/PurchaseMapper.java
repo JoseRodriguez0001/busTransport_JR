@@ -15,7 +15,7 @@ public interface PurchaseMapper {
     Purchase toEntity(PurchaseDtos.PurchaseCreateRequest request);
 
     @Mapping(source = "user.id", target = "user.id")
-    @Mapping(source = "user.username", target = "user.username")
+    @Mapping(source = "user.name", target = "user.name")
     @Mapping(source = "user.email", target = "user.email")
     @Mapping(target = "tickets", expression =
             "java(purchase.getTickets().stream().map(t -> " +
