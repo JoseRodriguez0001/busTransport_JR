@@ -15,8 +15,7 @@ public class UserDtos {
             @NotBlank @Email String email,
             @NotBlank String password,
             @NotBlank String name,
-            String phone,
-            String documentNumber
+            String phone
     ) implements Serializable {}
 
     // Para crear empleados (solo los crea un admin)
@@ -24,15 +23,13 @@ public class UserDtos {
             @NotBlank @Email String email,
             @NotBlank String name,
             String phone,
-            String documentNumber,
             @NotNull Role role  // ROLE_ADMIN, ROLE_CLERK, ROLE_DRIVER, ROLE_DISPATCHER
     ) implements Serializable {}
 
     //  Para actualizar usuario (SIN rol, email, status, password)
     public record UserUpdateRequest(
             String name,
-            String phone,
-            String documentNumber
+            String phone
     ) implements Serializable {}
 
     public record UserResponse(
@@ -40,8 +37,7 @@ public class UserDtos {
             String email,
             String name,
             String phone,
-            String documentNumber,
-            String role,
+            Role role,
             String status,
             OffsetDateTime createdAt
     ) implements Serializable {}
