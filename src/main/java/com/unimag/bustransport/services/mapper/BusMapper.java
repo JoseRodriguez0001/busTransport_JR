@@ -19,7 +19,7 @@ public interface BusMapper {
     @Mapping(target = "totalSeats", expression = "java(bus.getSeats() != null ? bus.getSeats().size() : 0)")
     BusDtos.BusResponse toResponse(Bus bus);
 
-    @Mapping(source = "status", target = "Status")
+    @Mapping(source = "status", target = "status")
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(BusDtos.BusUpdateRequest request, @MappingTarget Bus bus);
 }

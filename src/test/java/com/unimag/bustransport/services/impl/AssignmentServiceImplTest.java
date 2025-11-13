@@ -17,7 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -31,7 +33,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("AssignmentService Unit Tests")
 class AssignmentServiceImplTest {
 
     @Mock
@@ -43,19 +44,11 @@ class AssignmentServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
-    private final AssignmentMapper assignmentMapper = Mappers.getMapper(AssignmentMapper.class);
+    @Spy
+    private AssignmentMapper assignmentMapper = Mappers.getMapper(AssignmentMapper.class);
 
+    @InjectMocks
     private AssignmentServiceImpl assignmentService;
-
-    @BeforeEach
-    void setUp() {
-        assignmentService = new AssignmentServiceImpl(
-                assignmentRepository,
-                assignmentMapper,
-                tripService,
-                userRepository
-        );
-    }
 
     private User givenDriver() {
         return User.builder()

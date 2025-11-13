@@ -22,6 +22,6 @@ public class SeatHoldDtos {
             UserSummary user
     ) implements Serializable {
         public record TripSummary(Long id, String origin, String destination, OffsetDateTime departureAt) implements Serializable {}
-        public record UserSummary(Long id, String username) implements Serializable {}
+        public record UserSummary(Long id, String name) implements Serializable {}
     }
 }

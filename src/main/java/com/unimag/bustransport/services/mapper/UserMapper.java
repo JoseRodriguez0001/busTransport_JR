@@ -18,13 +18,6 @@ public interface UserMapper {
     @Mapping(target = "purchases", ignore = true)
     User toEntity(UserDtos.UserCreateRequest request);
 
-    @Mapping(target = "createdAt", source = "createdAt")
-    @Mapping(target = "role", source = "role")
-    @Mapping(target = "status", source = "status")
-    @Mapping(target = "assignmentsAsDriver", ignore = true)
-    @Mapping(target = "assignmentsAsDispatcher", ignore = true)
-    @Mapping(target = "seatHolds", ignore = true)
-    @Mapping(target = "purchases", ignore = true)
     UserDtos.UserResponse toResponse(User user);
 
     @Mapping(target = "passwordHash", ignore = true)

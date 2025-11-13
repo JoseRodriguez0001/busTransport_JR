@@ -45,7 +45,7 @@ public class PurchaseDtos {
             UserSummary user,
             List<TicketSummary> tickets
     ) implements Serializable {
-        public record UserSummary(Long id, String username, String email) implements Serializable {}
+        public record UserSummary(Long id, String name, String email) implements Serializable {}
         public record TicketSummary(Long id, String seatNumber, BigDecimal price, String status) implements Serializable {}
     }
 }

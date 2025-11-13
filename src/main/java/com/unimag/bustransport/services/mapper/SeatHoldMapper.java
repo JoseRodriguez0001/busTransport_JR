@@ -19,7 +19,7 @@ public interface SeatHoldMapper {
     @Mapping(source = "trip.route.destination", target = "trip.destination")
     @Mapping(source = "trip.departureAt", target = "trip.departureAt")
     @Mapping(source = "user.id", target = "user.id")
-    @Mapping(source = "user.username", target = "user.username")
+    @Mapping(source = "user.name", target = "user.name")
     SeatHoldDtos.SeatHoldResponse toResponse(SeatHold seatHold);
 
 }

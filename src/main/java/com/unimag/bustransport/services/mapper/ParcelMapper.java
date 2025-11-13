@@ -27,6 +27,5 @@ public interface ParcelMapper {
     ParcelDtos.ParcelResponse toResponse(Parcel parcel);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "status", expression = "java(request.status() != null ? com.unimag.bustransport.domain.entities.Parcel.Status.valueOf(request.status()) : null)")
     void updateEntityFromRequest(ParcelDtos.ParcelUpdateRequest request, @MappingTarget Parcel parcel);
 }

@@ -31,7 +31,6 @@ public interface TicketMapper {
     @Mapping(source = "toStop.name", target = "toStop.name")
     @Mapping(source = "purchase.id", target = "purchase.id")
     @Mapping(source = "purchase.totalAmount", target = "purchase.totalAmount")
-    @Mapping(target = "purchase.paymentStatus", expression = "java(ticket.getPurchase().getPaymentStatus().toString())")
     TicketDtos.TicketResponse toResponse(Ticket ticket);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
