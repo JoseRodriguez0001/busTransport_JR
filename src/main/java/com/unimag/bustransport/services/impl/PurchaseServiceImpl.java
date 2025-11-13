@@ -5,6 +5,8 @@ import com.unimag.bustransport.api.dto.TicketDtos;
 import com.unimag.bustransport.domain.entities.*;
 import com.unimag.bustransport.domain.repositories.*;
 import com.unimag.bustransport.exception.NotFoundException;
+import com.unimag.bustransport.notification.NotificationHelper;
+import com.unimag.bustransport.notification.NotificationType;
 import com.unimag.bustransport.services.*;
 import com.unimag.bustransport.services.mapper.PurchaseMapper;
 import jakarta.transaction.Transactional;
@@ -31,6 +33,8 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final SeatHoldService seatHoldService;
     private final FareRuleService fareRuleService;
     private final TicketService ticketService;
+
+    private final NotificationHelper notificationHelper;
 
     @Override
     public PurchaseDtos.PurchaseResponse createPurchase(PurchaseDtos.PurchaseCreateRequest request) {
@@ -196,6 +200,16 @@ public class PurchaseServiceImpl implements PurchaseService {
         });
 
         purchaseRepository.save(purchase);
+
+        try {
+            notificationHelper.sendPurchaseConfirmation(
+                    purchase,
+                    NotificationType.WHATSAPP
+            );
+        } catch (Exception e) {
+            // No fallar la compra si falla la notificación
+            log.error("Failed to send purchase confirmation notification: {}", e.getMessage());
+        }
 
         log.info("Purchase {} confirmed with payment reference {} and {} tickets SOLD",
                 purchaseId, paymentReference, purchase.getTickets().size());

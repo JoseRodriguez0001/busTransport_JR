@@ -221,10 +221,6 @@ public class TripServiceImpl implements TripService {
         if (!departureAt.isBefore(arrivalAt)) {
             throw new IllegalArgumentException("Departure must be before Arrival");
         }
-        /*
-        if (!date.equals(departureAt.toLocalDate())) {
-            throw new IllegalArgumentException("Departure must be after Arrival");
-        }*/
 
         long durationHours = ChronoUnit.HOURS.between(departureAt, arrivalAt);
         if (durationHours>32){
@@ -242,7 +238,7 @@ public class TripServiceImpl implements TripService {
 
     private void validateBusAvailability(Long busId, OffsetDateTime departureAt, OffsetDateTime arrivalAt, Long excludeTripId){
         //viajes activos del bus en esos estados
-        List<Trip> activeTrips = new ArrayList<>(repository.findByBusIdAndStatus(busId, Trip.Status.SCHEDULED));
+        List<Trip> activeTrips = repository.findByBusIdAndStatus(busId, Trip.Status.SCHEDULED);
         activeTrips.addAll(repository.findByBusIdAndStatus(busId, Trip.Status.BOARDING));
         activeTrips.addAll(repository.findByBusIdAndStatus(busId, Trip.Status.DEPARTED));
 
