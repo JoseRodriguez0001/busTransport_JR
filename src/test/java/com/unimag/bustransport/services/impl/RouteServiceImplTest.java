@@ -14,7 +14,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -26,7 +28,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("RouteService Unit Tests")
 class RouteServiceImplTest {
 
     @Mock
@@ -34,21 +35,12 @@ class RouteServiceImplTest {
 
     @Mock
     private StopRepository stopRepository;
-
+    @Spy
     private final RouteMapper routeMapper = Mappers.getMapper(RouteMapper.class);
+    @Spy
     private final StopMapper stopMapper = Mappers.getMapper(StopMapper.class);
-
+    @InjectMocks
     private RouteServiceImpl routeService;
-
-    @BeforeEach
-    void setUp() {
-        routeService = new RouteServiceImpl(
-                routeRepository,
-                stopRepository,
-                routeMapper,
-                stopMapper
-        );
-    }
 
     private Route givenRoute() {
         return Route.builder()

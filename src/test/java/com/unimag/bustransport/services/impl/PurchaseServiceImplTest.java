@@ -17,7 +17,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -34,7 +36,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("PurchaseService Unit Tests")
 class PurchaseServiceImplTest {
 
     @Mock
@@ -58,23 +59,12 @@ class PurchaseServiceImplTest {
     @Mock
     private TicketService ticketService;
 
+    @Spy
     private final PurchaseMapper purchaseMapper = Mappers.getMapper(PurchaseMapper.class);
 
+    @InjectMocks
     private PurchaseServiceImpl purchaseService;
 
-    @BeforeEach
-    void setUp() {
-        purchaseService = new PurchaseServiceImpl(
-                purchaseRepository,
-                userRepository,
-                tripRepository,
-                purchaseMapper,
-                seatHoldRepository,
-                seatHoldService,
-                fareRuleService,
-                ticketService
-        );
-    }
 
     private User givenUser() {
         return User.builder()

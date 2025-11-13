@@ -242,7 +242,7 @@ public class TripServiceImpl implements TripService {
 
     private void validateBusAvailability(Long busId, OffsetDateTime departureAt, OffsetDateTime arrivalAt, Long excludeTripId){
         //viajes activos del bus en esos estados
-        List<Trip> activeTrips = repository.findByBusIdAndStatus(busId, Trip.Status.SCHEDULED);
+        List<Trip> activeTrips = new ArrayList<>(repository.findByBusIdAndStatus(busId, Trip.Status.SCHEDULED));
         activeTrips.addAll(repository.findByBusIdAndStatus(busId, Trip.Status.BOARDING));
         activeTrips.addAll(repository.findByBusIdAndStatus(busId, Trip.Status.DEPARTED));
 

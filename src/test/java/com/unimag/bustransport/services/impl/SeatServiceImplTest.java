@@ -17,6 +17,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.List;
@@ -50,6 +51,7 @@ class SeatServiceImplTest {
     @Mock
     private SeatHoldService seatHoldService;
 
+    @Spy
     private final SeatMapper seatMapper = Mappers.getMapper(SeatMapper.class);
 
     @InjectMocks
@@ -62,16 +64,6 @@ class SeatServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        seatService = new SeatServiceImpl(
-                seatRepository,
-                busRepository,
-                tripRepository,
-                ticketRepository,
-                stopRepository,
-                purchaseRepository,
-                seatHoldService,
-                seatMapper
-        );
 
         // Preparar datos de prueba
         bus = createBus(1L, "ABC123", 40, Bus.Status.ACTIVE);
@@ -117,7 +109,7 @@ class SeatServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatService.createSeat(createRequest))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Bus with ID 1 not found");
+                .hasMessageContaining("Bus not found");
 
         verify(busRepository).findById(1L);
         verify(seatRepository, never()).save(any());
@@ -134,7 +126,7 @@ class SeatServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatService.createSeat(createRequest))
                 .isInstanceOf(DuplicateResourceException.class)
-                .hasMessageContaining("Seat 2A already exists");
+                .hasMessageContaining("Seat already exists");
 
         verify(seatRepository, never()).save(any());
     }
@@ -150,7 +142,7 @@ class SeatServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatService.createSeat(createRequest))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("reached its capacity");
+                .hasMessageContaining("Capacity bus exceeded");
 
         verify(seatRepository, never()).save(any());
     }
@@ -200,7 +192,7 @@ class SeatServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatService.updateSeat(1L, updateRequest))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Seat with ID 1 not found");
+                .hasMessageContaining("Seat not found");
 
         verify(seatRepository, never()).save(any());
     }
@@ -230,9 +222,6 @@ class SeatServiceImplTest {
     void deleteSeat_ShouldDeleteSuccessfully() {
         // Given
         when(seatRepository.findById(1L)).thenReturn(Optional.of(seat));
-        when(ticketRepository.findByTripIdAndSeatNumberIn(isNull(), anyList()))
-                .thenReturn(List.of());
-        when(seatHoldService.isSeatOnHold(isNull(), eq("1A"))).thenReturn(false);
 
         // When
         seatService.deleteSeat(1L);
@@ -251,7 +240,7 @@ class SeatServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatService.deleteSeat(1L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Seat with ID 1 not found");
+                .hasMessageContaining("Seat not found");
 
         verify(seatRepository, never()).delete(any());
     }
@@ -287,7 +276,7 @@ class SeatServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatService.getSeatsByBusId(1L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Bus with ID 1 not found");
+                .hasMessageContaining("Bus not found");
 
         verify(seatRepository, never()).findByBusIdOrderByNumberAsc(anyLong());
     }

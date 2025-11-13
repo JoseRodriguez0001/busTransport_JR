@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -39,6 +40,7 @@ class TicketServiceImplTest {
     private StopRepository stopRepository;
     @Mock
     private PurchaseRepository purchaseRepository;
+    @Spy
     private TicketMapper ticketMapper = Mappers.getMapper(TicketMapper.class);
     @InjectMocks
     private TicketServiceImpl ticketService;
@@ -56,14 +58,6 @@ class TicketServiceImplTest {
 
     @BeforeEach
     void setUp() {
-        ticketService = new TicketServiceImpl(
-                ticketRepository,
-                tripRepository,
-                passengerRepository,
-                stopRepository,
-                purchaseRepository,
-                ticketMapper
-        );
 
         user = createUser(1L, "test@example.com", "Test User");
         route = createRoute(1L, "R001", "Santa Marta", "Barranquilla", 100.0, 120);

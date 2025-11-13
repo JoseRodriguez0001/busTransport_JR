@@ -13,7 +13,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
@@ -29,7 +31,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("SeatHoldService Unit Tests")
 class SeatHoldServiceImplTest {
 
     @Mock
@@ -44,20 +45,11 @@ class SeatHoldServiceImplTest {
     @Mock
     private ConfigService configService;
 
+    @Spy
     private final SeatHoldMapper seatHoldMapper = Mappers.getMapper(SeatHoldMapper.class);
-
+    @InjectMocks
     private SeatHoldServiceImpl seatHoldService;
 
-    @BeforeEach
-    void setUp() {
-        seatHoldService = new SeatHoldServiceImpl(
-                seatHoldRepository,
-                tripRepository,
-                userRepository,
-                seatHoldMapper,
-                configService
-        );
-    }
 
     private User givenUser() {
         return User.builder()

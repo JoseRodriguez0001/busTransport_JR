@@ -17,10 +17,6 @@ public interface PurchaseMapper {
     @Mapping(source = "user.id", target = "user.id")
     @Mapping(source = "user.name", target = "user.name")
     @Mapping(source = "user.email", target = "user.email")
-    @Mapping(target = "tickets", expression =
-            "java(purchase.getTickets().stream().map(t -> " +
-                    "new PurchaseDtos.PurchaseResponse.TicketSummary(t.getId(), t.getSeatNumber(), t.getPrice(), t.getStatus().name()))" +
-                    ".toList())")
     PurchaseDtos.PurchaseResponse toResponse(Purchase purchase);
 
 
