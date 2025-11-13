@@ -305,7 +305,7 @@ public class UserServiceImplTest {
                 givenUser(2L, "driver2@test.com", Role.ROLE_DRIVER, User.Status.ACTIVE)
         );
 
-        when(userRepository.findActiveUsersByRole(Role.ROLE_DRIVER)).thenReturn(users);
+        when(userRepository.findByRoleAndStatus(Role.ROLE_DRIVER, User.Status.ACTIVE)).thenReturn(users);
 
         // When
         List<UserDtos.UserResponse> result = userService.getAllUsersByRole(Role.ROLE_DRIVER);

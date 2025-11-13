@@ -47,6 +47,18 @@ public class PassengerRepositoryTest extends AbstractRepositoryTI {
                 .build();
         return userRepository.save(user);
     }
+    private User givenUser(String email, String name, Role role,String phone) {
+        User user = User.builder()
+                .email(email)
+                .name(name)
+                .phone(phone)
+                .passwordHash("hashedPassword123")
+                .role(role)
+                .status(User.Status.ACTIVE)
+                .createdAt(OffsetDateTime.now())
+                .build();
+        return userRepository.save(user);
+    }
 
     private Passenger buildPassenger() {
         return buildPassenger("Juan Pérez", "CC", "123456789", null);
@@ -59,7 +71,7 @@ public class PassengerRepositoryTest extends AbstractRepositoryTI {
                 .documentNumber(docNumber)
                 .birthDate(LocalDate.of(1990, 5, 15))
                 .phoneNumber("+573001234567")
-                .createAt(OffsetDateTime.now())
+                .createdAt(OffsetDateTime.now())
                 .user(user)
                 .build();
     }
@@ -151,7 +163,7 @@ public class PassengerRepositoryTest extends AbstractRepositoryTI {
     void shouldNotReturnPassengersFromOtherUsers() {
         // Given
         User user1 = givenUser("user1@test.com", "User 1", Role.ROLE_PASSENGER);
-        User user2 = givenUser("user2@test.com", "User 2", Role.ROLE_PASSENGER);
+        User user2 = givenUser("user2@test.com", "User 2", Role.ROLE_PASSENGER,"3005543094");
         
         givenMultiplePassengersForUser(user1, 2);
         givenMultiplePassengersForUser(user2, 3);
@@ -245,7 +257,7 @@ public class PassengerRepositoryTest extends AbstractRepositoryTI {
                 .documentNumber(null)
                 .birthDate(null)
                 .phoneNumber(null)
-                .createAt(OffsetDateTime.now())
+                .createdAt(OffsetDateTime.now())
                 .user(null)
                 .build();
 

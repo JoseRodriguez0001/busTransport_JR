@@ -8,7 +8,7 @@ import org.mapstruct.*;
 public interface PassengerMapper {
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createAt", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "tickets", ignore = true)
     @Mapping(target = "user", ignore = true)
     Passenger toEntity(PassengerDtos.PassengerCreateRequest request);
@@ -22,7 +22,7 @@ public interface PassengerMapper {
     PassengerDtos.PassengerResponse toResponse(Passenger passenger);
 
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "createAt", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "tickets", ignore = true)
     @Mapping(target = "user", ignore = true)
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

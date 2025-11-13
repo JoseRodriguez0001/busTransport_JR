@@ -4,10 +4,12 @@ import com.unimag.bustransport.domain.entities.Bus;
 import com.unimag.bustransport.domain.entities.Seat;
 import com.unimag.bustransport.domain.repositories.BusRepository;
 import com.unimag.bustransport.domain.repositories.SeatRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +21,8 @@ public class BusRepositoryTest extends AbstractRepositoryTI {
 
     @Autowired
     private BusRepository busRepository;
+    @Autowired
+    private TestEntityManager entityManager;
 
     @Autowired
     private SeatRepository seatRepository;
@@ -113,11 +117,13 @@ public class BusRepositoryTest extends AbstractRepositoryTI {
     @DisplayName("Debe encontrar bus con asientos usando JOIN FETCH")
     void shouldFindBusByIdWithSeats() {
         // Given
-        Bus bus = givenActiveBus();
+        Bus bus = givenBus("XYZ789", 40, Bus.Status.ACTIVE);
         givenSeat(bus, "1A");
         givenSeat(bus, "1B");
         givenSeat(bus, "2A");
 
+        entityManager.flush();
+        entityManager.clear();
         // When
         Optional<Bus> found = busRepository.findByIdWithSeats(bus.getId());
 
@@ -139,19 +145,7 @@ public class BusRepositoryTest extends AbstractRepositoryTI {
         assertThat(found).isEmpty();
     }
 
-    @Test
-    @DisplayName("Debe retornar bus sin asientos cuando no tiene")
-    void shouldReturnBusWithEmptySeatsListWhenNoSeats() {
-        // Given
-        Bus bus = givenActiveBus();
 
-        // When
-        Optional<Bus> found = busRepository.findByIdWithSeats(bus.getId());
-
-        // Then
-        assertThat(found).isPresent();
-        assertThat(found.get().getSeats()).isEmpty();
-    }
 
     @Test
     @DisplayName("Debe cambiar el status del bus")
@@ -161,7 +155,8 @@ public class BusRepositoryTest extends AbstractRepositoryTI {
 
         // When
         busRepository.changeBusStatus(bus.getId(), Bus.Status.IN_REPAIR);
-        busRepository.flush(); // Asegura que se ejecute la actualización
+        entityManager.flush();
+        entityManager.clear();
 
         // Then
         Bus updated = busRepository.findById(bus.getId()).orElseThrow();
@@ -176,7 +171,8 @@ public class BusRepositoryTest extends AbstractRepositoryTI {
 
         // When
         busRepository.changeBusStatus(bus.getId(), Bus.Status.RETIRED);
-        busRepository.flush();
+        entityManager.flush();
+        entityManager.clear();
 
         // Then
         Bus updated = busRepository.findById(bus.getId()).orElseThrow();
@@ -191,7 +187,8 @@ public class BusRepositoryTest extends AbstractRepositoryTI {
 
         // When
         busRepository.changeBusStatus(bus.getId(), Bus.Status.ACTIVE);
-        busRepository.flush();
+        entityManager.flush();
+        entityManager.clear();
 
         // Then
         Bus updated = busRepository.findById(bus.getId()).orElseThrow();

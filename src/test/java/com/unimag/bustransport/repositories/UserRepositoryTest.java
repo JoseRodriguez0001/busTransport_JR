@@ -14,7 +14,6 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
 
-@DisplayName("UserRepository Integration Tests")
 public class UserRepositoryTest extends AbstractRepositoryTI {
 
     @Autowired
@@ -30,6 +29,18 @@ public class UserRepositoryTest extends AbstractRepositoryTI {
                 .email(email)
                 .name(name)
                 .phone("+573001234567")
+                .passwordHash("hashedPassword123")
+                .role(role)
+                .status(status)
+                .createdAt(OffsetDateTime.now())
+                .build();
+        return userRepository.save(user);
+    }
+    private User givenUser(String email, String name, Role role, User.Status status,String phone) {
+        User user = User.builder()
+                .email(email)
+                .name(name)
+                .phone(phone)
                 .passwordHash("hashedPassword123")
                 .role(role)
                 .status(status)
@@ -132,12 +143,12 @@ public class UserRepositoryTest extends AbstractRepositoryTI {
     void shouldFindUsersByRoleAndStatus() {
         // Given
         givenUser("driver1@test.com", "Driver 1", Role.ROLE_DRIVER, User.Status.ACTIVE);
-        givenUser("driver2@test.com", "Driver 2", Role.ROLE_DRIVER, User.Status.ACTIVE);
-        givenUser("driver3@test.com", "Driver 3", Role.ROLE_DRIVER, User.Status.INACTIVE);
-        givenUser("passenger@test.com", "Passenger", Role.ROLE_PASSENGER, User.Status.ACTIVE);
+        givenUser("driver2@test.com", "Driver 2", Role.ROLE_DRIVER, User.Status.ACTIVE,"3005645647");
+        givenUser("driver3@test.com", "Driver 3", Role.ROLE_DRIVER, User.Status.INACTIVE,"3224343434");
+        givenUser("passenger@test.com", "Passenger", Role.ROLE_PASSENGER, User.Status.ACTIVE,"3213455654");
 
         // When
-        List<User> activeDrivers = userRepository.findByRoleAndStatus(Role.ROLE_DRIVER, User.Status.ACTIVE);
+        List<User> activeDrivers = userRepository.findByRoleAndStatus(Role.ROLE_DRIVER,User.Status.ACTIVE);
 
         // Then
         assertThat(activeDrivers).hasSize(2);
@@ -163,12 +174,12 @@ public class UserRepositoryTest extends AbstractRepositoryTI {
     void shouldFindActiveUsersByRole() {
         // Given
         givenUser("driver1@test.com", "Driver 1", Role.ROLE_DRIVER, User.Status.ACTIVE);
-        givenUser("driver2@test.com", "Driver 2", Role.ROLE_DRIVER, User.Status.ACTIVE);
-        givenUser("driver3@test.com", "Driver 3", Role.ROLE_DRIVER, User.Status.INACTIVE);
-        givenUser("driver4@test.com", "Driver 4", Role.ROLE_DRIVER, User.Status.BLOCKED);
+        givenUser("driver2@test.com", "Driver 2", Role.ROLE_DRIVER, User.Status.ACTIVE,"3005645647");
+        givenUser("driver3@test.com", "Driver 3", Role.ROLE_DRIVER, User.Status.INACTIVE,"3213455654");
+        givenUser("driver4@test.com", "Driver 4", Role.ROLE_DRIVER, User.Status.BLOCKED,"3023455667");
 
         // When
-        List<User> activeDrivers = userRepository.findActiveUsersByRole(Role.ROLE_DRIVER);
+        List<User> activeDrivers = userRepository.findByRoleAndStatus(Role.ROLE_DRIVER,User.Status.ACTIVE);
 
         // Then
         assertThat(activeDrivers).hasSize(2);
@@ -183,11 +194,11 @@ public class UserRepositoryTest extends AbstractRepositoryTI {
     void shouldReturnOnlyActiveUsersNotInactiveOrBlocked() {
         // Given
         givenUser("pass1@test.com", "Pass Active", Role.ROLE_PASSENGER, User.Status.ACTIVE);
-        givenUser("pass2@test.com", "Pass Inactive", Role.ROLE_PASSENGER, User.Status.INACTIVE);
-        givenUser("pass3@test.com", "Pass Blocked", Role.ROLE_PASSENGER, User.Status.BLOCKED);
+        givenUser("pass2@test.com", "Pass Inactive", Role.ROLE_PASSENGER, User.Status.INACTIVE,"3423455667");
+        givenUser("pass3@test.com", "Pass Blocked", Role.ROLE_PASSENGER, User.Status.BLOCKED,"3545677889");
 
         // When
-        List<User> activePassengers = userRepository.findActiveUsersByRole(Role.ROLE_PASSENGER);
+        List<User> activePassengers = userRepository.findByRoleAndStatus(Role.ROLE_PASSENGER, User.Status.ACTIVE);
 
         // Then
         assertThat(activePassengers).hasSize(1);
@@ -198,10 +209,10 @@ public class UserRepositoryTest extends AbstractRepositoryTI {
     @DisplayName("Debe retornar lista vacía cuando no hay usuarios activos del rol")
     void shouldReturnEmptyListWhenNoActiveUsersOfRole() {
         // Given
-        givenUser("driver@test.com", "Driver", Role.ROLE_DRIVER, User.Status.INACTIVE);
+        givenUser("driver@test.com", "Driver", Role.ROLE_DRIVER, User.Status.INACTIVE,"3213455654");
 
         // When
-        List<User> activeDrivers = userRepository.findActiveUsersByRole(Role.ROLE_DRIVER);
+        List<User> activeDrivers = userRepository.findByRoleAndStatus(Role.ROLE_DRIVER, User.Status.ACTIVE);
 
         // Then
         assertThat(activeDrivers).isEmpty();

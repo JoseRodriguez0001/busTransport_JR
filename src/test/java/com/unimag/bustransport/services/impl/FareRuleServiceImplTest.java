@@ -117,7 +117,7 @@ class FareRuleServiceImplTest {
                 .documentNumber("123456")
                 .birthDate(birthDate)
                 .phoneNumber("3001234567")
-                .createAt(OffsetDateTime.now())
+                .createdAt(OffsetDateTime.now())
                 .build();
     }
 

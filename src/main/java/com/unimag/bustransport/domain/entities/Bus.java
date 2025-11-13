@@ -45,8 +45,8 @@ public class Bus {
         trip.setBus(this);
     }
 
-    @OneToMany(mappedBy = "bus",fetch = FetchType.LAZY)
-    private List<Seat> seats;
+    @OneToMany(mappedBy = "bus",fetch = FetchType.LAZY,cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Seat> seats = new ArrayList<>();
     public void addSeat(Seat seat) {
         this.seats.add(seat);
         seat.setBus(this);

@@ -30,7 +30,7 @@ public class Passenger {
     @Column(name ="phone_number")
     private String phoneNumber;
     @Column(name = "create_at")
-    private OffsetDateTime createAt;
+    private OffsetDateTime createdAt;
     @ManyToOne
     @JoinColumn(name = "user_id",foreignKey = @ForeignKey(name = "fk_passenger_user"))
     private User user;

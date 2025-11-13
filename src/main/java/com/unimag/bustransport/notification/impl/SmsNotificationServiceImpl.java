@@ -6,10 +6,6 @@ import com.unimag.bustransport.notification.NotificationType;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-/**
- * Implementación Mock de notificaciones por SMS
- * En producción, aquí integrarías con Twilio, AWS SNS, etc.
- */
 @Slf4j
 @Service
 public class SmsNotificationServiceImpl extends AbstractNotificationService {

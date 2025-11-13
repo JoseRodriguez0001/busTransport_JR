@@ -26,6 +26,7 @@ public class Trip {
     @Column(nullable = false, name = "arrival_at")
     private OffsetDateTime arrivalAt;
     private Double overbookingPercent;
+    @Enumerated(EnumType.STRING)
     private Status status = Status.SCHEDULED;
 
     @ManyToOne

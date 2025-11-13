@@ -436,7 +436,7 @@ class TicketServiceImplTest {
         passenger.setDocumentNumber(documentNumber);
         passenger.setBirthDate(LocalDate.of(1990, 5, 15));
         passenger.setPhoneNumber("+573001234567");
-        passenger.setCreateAt(OffsetDateTime.now());
+        passenger.setCreatedAt(OffsetDateTime.now());
         return passenger;
     }
 

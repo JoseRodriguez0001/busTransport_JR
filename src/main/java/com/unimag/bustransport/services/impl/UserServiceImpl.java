@@ -346,7 +346,7 @@ public class UserServiceImpl implements UserService {
     public List<UserDtos.UserResponse> getAllUsersByRole(Role role) {
         log.debug("Getting all users by role: {}", role);
 
-        List<User> users = userRepository.findActiveUsersByRole((role));
+        List<User> users = userRepository.findByRoleAndStatus((role), User.Status.ACTIVE);
 
         log.info("Found {} users with role: {}", users.size(), role);
 

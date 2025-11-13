@@ -18,12 +18,12 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
     Optional<Ticket> findByQrCode(String qrCode);
     List<Ticket> findByStatus(Ticket.Status status);
 
-    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.trip.id = :tripId AND t.status = 'SOLD'")
+    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.trip.id = :tripId AND t.status = com.unimag.bustransport.domain.entities.Ticket.Status.SOLD")
     long countSoldByTrip(@Param("tripId") Long tripId);
     @Query("SELECT COUNT(t) " +
             "FROM Ticket t " +
             "WHERE t.trip.id = :tripId AND t.seatNumber= :seatNumber " +
-            "                          AND t.status = ('SOLD') " +
+            "                          AND t.status = (com.unimag.bustransport.domain.entities.Ticket.Status.SOLD) " +
             "                          AND (t.fromStop.order< :toIndex AND t.toStop.order> :fromIndex)")
     long countSeatOcuppyBetweenStops( @Param("tripId") Long tripId,
                                       @Param("fromIndex") Integer fromIndex,
@@ -44,7 +44,7 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
     @Query("SELECT t FROM Ticket t " +
             "WHERE t.trip.id = :tripId " +
             "AND t.seatNumber = :seatNumber " +
-            "AND t.status = 'SOLD' " +
+            "AND t.status = com.unimag.bustransport.domain.entities.Ticket.Status.SOLD " +
             "AND (" +
             "  (t.fromStop.order <= :fromOrder AND t.toStop.order > :fromOrder) OR " +
             "  (t.fromStop.order < :toOrder AND t.toStop.order >= :toOrder) OR " +
@@ -58,8 +58,8 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
     );
 
     @Query("SELECT t FROM Ticket t " +
-            "WHERE t.status = 'PENDING' " +
-            "AND t.purchase.paymentStatus = 'PENDING' " +
+            "WHERE t.status = com.unimag.bustransport.domain.entities.Ticket.Status.PENDING " +
+            "AND t.purchase.paymentStatus = com.unimag.bustransport.domain.entities.Purchase.PaymentStatus.PENDING " +
             "AND t.purchase.createdAt < :cutoffTime")
     List<Ticket> findExpiredPendingTickets(@Param("cutoffTime") OffsetDateTime cutoffTime);
 }

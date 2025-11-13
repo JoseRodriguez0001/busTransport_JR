@@ -37,7 +37,7 @@ public class PassengerServiceImpl implements PassengerService {
             log.debug("Creating a passenger without an associated user (guest purchase)");
         }
 
-        passenger.setCreateAt(OffsetDateTime.now());//fecha de creacion
+        passenger.setCreatedAt(OffsetDateTime.now());//fecha de creacion
         Passenger savedPassenger = repository.save(passenger);//guardando
         log.info("Passenger created");
         return mapper.toResponse(savedPassenger);//retorna informacion del passenger

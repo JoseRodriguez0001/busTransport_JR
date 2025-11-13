@@ -113,7 +113,7 @@ public class TicketRepositoryTest extends AbstractRepositoryTI {
                 .documentNumber("123456789")
                 .birthDate(LocalDate.of(1990, 5, 15))
                 .phoneNumber("+573001234567")
-                .createAt(OffsetDateTime.now())
+                .createdAt(OffsetDateTime.now())
                 .build();
         return passengerRepository.save(passenger);
     }

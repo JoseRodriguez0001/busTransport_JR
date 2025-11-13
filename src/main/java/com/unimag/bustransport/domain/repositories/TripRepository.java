@@ -19,7 +19,7 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             "WHERE t.route.origin = :origin " +
             "      AND t.route.destination = :destination " +
             "      AND t.date = :date " +
-            "      AND t.status = 'SCHEDULED'")
+            "      AND t.status = com.unimag.bustransport.domain.entities.Trip.Status.SCHEDULED")
     List<Trip> findTripsByOriginAndDestination(@Param("origin") String origin,
                                                @Param("destination") String destination,
                                                @Param("date") LocalDate date);
@@ -30,7 +30,7 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
     @Query( "SELECT t " +
             "FROM Trip t " +
             "WHERE t.date = :date " +
-            "      AND t.status = 'SCHEDULED' " +
+            "      AND t.status = com.unimag.bustransport.domain.entities.Trip.Status.SCHEDULED " +
             "      AND t.departureAt <= :threshold")
             List<Trip> findTripsNearDeparture(@Param("date") LocalDate date, @Param("threshold") OffsetDateTime threshold);
     //encontrar viaje que con bus y sus asientos para ver su disponibilidad
@@ -42,7 +42,7 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             Optional<Trip> findByIdWithBusAndSeats(@Param("tripId") Long tripId);
     @Query("SELECT COUNT(ti)" +
             "FROM Ticket ti " +
-            "WHERE ti.trip.id = :tripId AND ti.status = 'SOLD'")
+            "WHERE ti.trip.id = :tripId AND ti.status = com.unimag.bustransport.domain.entities.Ticket.Status.SOLD")
     Long countSoldTickets(Long tripId);
 
 }

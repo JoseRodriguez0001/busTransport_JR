@@ -26,6 +26,8 @@ public class Seat {
     @JoinColumn(name = "bus_id",foreignKey = @ForeignKey(name = "fk_seat_bus"))
     private Bus bus;
 
+
+
     public enum Type{
         STANDARD,
         PREFERENTIAL
