@@ -30,6 +30,7 @@ public class PurchaseServiceImpl implements PurchaseService {
     private final UserRepository userRepository;
     private final TripRepository tripRepository;
     private final PurchaseMapper purchaseMapper;
+    private final SeatHoldRepository seatHoldRepository;
     private final SeatHoldService seatHoldService;
     private final FareRuleService fareRuleService;
     private final TicketService ticketService;
@@ -179,10 +180,20 @@ public class PurchaseServiceImpl implements PurchaseService {
         purchase.setPaymentStatus(Purchase.PaymentStatus.CONFIRMED);
         purchase.setPaymentReference(paymentReference);
 
-        // 5. Cambiar Tickets de PENDING a SOLD y generar QR usando TicketService
+// 5. Cambiar Tickets de PENDING a SOLD y generar QR usando TicketService
         purchase.getTickets().forEach(ticket -> {
             ticket.setStatus(Ticket.Status.SOLD);
             ticketService.generateQrForTicket(ticket.getId());
+
+            // Marcar SeatHold como EXPIRED
+            seatHoldRepository.findByTripIdAndSeatNumberAndUserId(
+                    ticket.getTrip().getId(),
+                    ticket.getSeatNumber(),
+                    purchase.getUser().getId()
+            ).ifPresent(hold -> {
+                hold.setStatus(SeatHold.Status.EXPIRED);
+                seatHoldRepository.save(hold);
+            });
 
             log.info("Ticket ID {} changed from PENDING to SOLD with QR", ticket.getId());
         });
@@ -212,17 +223,27 @@ public class PurchaseServiceImpl implements PurchaseService {
             );
         }
 
+        // Marcar SeatHolds como EXPIRED y cancelar tickets
+        purchase.getTickets().forEach(ticket -> {
+            // Marcar SeatHold como EXPIRED
+            seatHoldRepository.findByTripIdAndSeatNumberAndUserId(
+                    ticket.getTrip().getId(),
+                    ticket.getSeatNumber(),
+                    purchase.getUser().getId()
+            ).ifPresent(hold -> {
+                hold.setStatus(SeatHold.Status.EXPIRED);
+                seatHoldRepository.save(hold);
+            });
+
+            // Cancelar ticket
+            ticket.setStatus(Ticket.Status.CANCELLED);
+        });
+
+        // Actualizar purchase
         purchase.setPaymentStatus(Purchase.PaymentStatus.CANCELLED);
         purchaseRepository.save(purchase);
 
-        // Cancelar tickets asociados
-        if (!purchase.getTickets().isEmpty()) {
-            purchase.getTickets().forEach(ticket -> {
-                ticket.setStatus(Ticket.Status.CANCELLED);
-            });
-        }
-
-        log.info("Purchase with ID {} cancelled", purchaseId);
+        log.info("Purchase with ID {} cancelled. SeatHolds marked as EXPIRED", purchaseId);
     }
 
     @Override

@@ -17,6 +17,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -127,23 +128,43 @@ public class SeatHoldServiceImpl implements SeatHoldService {
         );
     }
 
-// Elimina holds expirados
+    // Marca HOLD → EXPIRED (cuando pasa el tiempo y no alcanzo a crear compra)
+    @Scheduled(cron = "0 */1 * * * *")  // Cada 1 minuto
+    @Transactional
     @Override
-    @Scheduled(cron = "0 */5 * * * *")  // Cada 5 minutos
-    public int expireOldHolds() {
-        log.debug("Starting cleanup of expired seat holds");
+    public int markExpiredHolds() {
+        log.debug("Marking expired seat holds");
 
-        List<SeatHold> expiredHolds = seatHoldRepository.findExpiredHolds();
+        List<SeatHold> expiredHolds = seatHoldRepository
+                .findByStatusAndExpiresAtBefore(SeatHold.Status.HOLD, OffsetDateTime.now());
 
         if (expiredHolds.isEmpty()) {
-            log.debug("No expired holds found");
+            return 0;
+        }
+
+        expiredHolds.forEach(hold -> hold.setStatus(SeatHold.Status.EXPIRED));
+        seatHoldRepository.saveAll(expiredHolds);
+
+        log.info("Marked {} seat holds as EXPIRED", expiredHolds.size());
+        return expiredHolds.size();
+    }
+
+    // Elimina todos los EXPIRED
+    @Scheduled(cron = "0 */5 * * * *")  // Cada 5 minutos
+    @Transactional
+    @Override
+    public int deleteExpiredHolds() {
+        log.debug("Deleting EXPIRED seat holds");
+
+        List<SeatHold> expiredHolds = seatHoldRepository.findByStatus((SeatHold.Status.EXPIRED));
+
+        if (expiredHolds.isEmpty()) {
             return 0;
         }
 
         seatHoldRepository.deleteAll(expiredHolds);
 
-        log.info("Deleted {} expired seat holds", expiredHolds.size());
-
+        log.info("Deleted {} EXPIRED seat holds", expiredHolds.size());
         return expiredHolds.size();
     }
 
