@@ -10,9 +10,9 @@ public interface AssignmentMapper {
     //quiere decir "no intentes llenar ese atributo de la entidad"
     //target -> objeto destino / source -> objeto fuente u objeto origen
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "trip", ignore = true)
-    @Mapping(target = "driver", ignore = true)
-    @Mapping(target = "dispatcher", ignore = true)
+    @Mapping(target = "trip.id", source = "tripId")
+    @Mapping(target = "driver.id", source = "driverId")
+    @Mapping(target = "dispatcher.id", source = "dispatcherId")
     @Mapping(target = "assignedAt", ignore = true)
     Assignment toEntity(AssignmentDtos.AssignmentCreateRequest request);
 

@@ -10,7 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
@@ -23,23 +25,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("IncidentService Unit Tests")
 class IncidentServiceImplTest {
 
     @Mock
     private IncidentRepository incidentRepository;
 
+    @Spy
     private final IncidentMapper incidentMapper = Mappers.getMapper(IncidentMapper.class);
 
+    @InjectMocks
     private IncidentServiceImpl incidentService;
-
-    @BeforeEach
-    void setUp() {
-        incidentService = new IncidentServiceImpl(
-                incidentRepository,
-                incidentMapper
-        );
-    }
 
     private Incident givenIncident() {
         return Incident.builder()

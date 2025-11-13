@@ -338,6 +338,7 @@ public class ParcelServiceImpl implements ParcelService {
 
         if (parcel.getDeliveryOtp() == null || !parcel.getDeliveryOtp().equals(otp)) {
             markAsFailed(parcelId, "different otp code or not exists");
+            return;
         }
 
         if (proofPhotoUrl == null || proofPhotoUrl.isBlank()) {

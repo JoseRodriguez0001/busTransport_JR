@@ -10,7 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -23,23 +25,17 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ConfigService Unit Tests")
 class ConfigServiceImplTest {
 
     @Mock
     private ConfigRepository configRepository;
 
+    @Spy
     private final ConfigMapper configMapper = Mappers.getMapper(ConfigMapper.class);
 
+    @InjectMocks
     private ConfigServiceImpl configService;
 
-    @BeforeEach
-    void setUp() {
-        configService = new ConfigServiceImpl(
-                configRepository,
-                configMapper
-        );
-    }
 
     private Config givenConfig(String key, String value) {
         return Config.builder()

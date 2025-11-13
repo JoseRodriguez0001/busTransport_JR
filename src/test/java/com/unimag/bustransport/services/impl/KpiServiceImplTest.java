@@ -10,7 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
@@ -23,23 +25,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("KpiService Unit Tests")
 class KpiServiceImplTest {
 
     @Mock
     private KpiRepository kpiRepository;
 
+    @Spy
     private final KpiMapper kpiMapper = Mappers.getMapper(KpiMapper.class);
 
+    @InjectMocks
     private KpiServiceImpl kpiService;
-
-    @BeforeEach
-    void setUp() {
-        kpiService = new KpiServiceImpl(
-                kpiRepository,
-                kpiMapper
-        );
-    }
 
     private Kpi givenKpi(String name, Double value) {
         return Kpi.builder()

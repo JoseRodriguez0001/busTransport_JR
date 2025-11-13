@@ -13,7 +13,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -43,20 +45,11 @@ class ParcelServiceImplTest {
     @Mock
     private IncidentService incidentService;
 
+    @Spy
     private final ParcelMapper parcelMapper = Mappers.getMapper(ParcelMapper.class);
 
+    @InjectMocks
     private ParcelServiceImpl parcelService;
-
-    @BeforeEach
-    void setUp() {
-        parcelService = new ParcelServiceImpl(
-                parcelRepository,
-                stopRepository,
-                tripRepository,
-                incidentService,
-                parcelMapper
-        );
-    }
 
     private Route givenRoute() {
         return Route.builder()

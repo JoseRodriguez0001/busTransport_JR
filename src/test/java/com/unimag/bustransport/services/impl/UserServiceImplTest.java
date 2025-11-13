@@ -5,15 +5,14 @@ import com.unimag.bustransport.domain.entities.Role;
 import com.unimag.bustransport.domain.entities.User;
 import com.unimag.bustransport.domain.repositories.UserRepository;
 import com.unimag.bustransport.exception.InvalidCredentialsException;
-import com.unimag.bustransport.services.UserService;
 import com.unimag.bustransport.services.mapper.UserMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.OffsetDateTime;
@@ -26,18 +25,16 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class UserServiceImplTest {
+class UserServiceImplTest {
     @Mock
     private UserRepository userRepository;
+
+    @Spy
     private final UserMapper mapper = Mappers.getMapper(UserMapper.class);
 
     @InjectMocks
-    private UserService userService;
+    private UserServiceImpl userService;
 
-    @BeforeEach
-    void setUp() {
-        userService = new UserServiceImpl(userRepository, mapper);
-    }
 
     private User givenUser(Long id, String email, Role role, User.Status status) {
         return User.builder()
@@ -45,6 +42,19 @@ public class UserServiceImplTest {
                 .email(email)
                 .name("Test User")
                 .phone("3001234567")
+                .passwordHash("password123")
+                .role(role)
+                .status(status)
+                .createdAt(OffsetDateTime.now())
+                .build();
+    }
+
+    private User givenUserWithPhone(Long id, String email, String phone, Role role, User.Status status) {
+        return User.builder()
+                .id(id)
+                .email(email)
+                .name("Test User")
+                .phone(phone)
                 .passwordHash("password123")
                 .role(role)
                 .status(status)
@@ -75,14 +85,13 @@ public class UserServiceImplTest {
     void shouldRegisterPassenger(){
         //given
         UserDtos.UserCreateRequest request = givenRegisterRequest();
-        User userSaved = givenUser(1L, "test@example.com", Role.ROLE_PASSENGER, User.Status.ACTIVE);
+        User userSaved = givenUserWithPhone(1L, "test@example.com", "3005540394", Role.ROLE_PASSENGER, User.Status.ACTIVE);
 
         when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
-        when(userRepository.findByPhone("3001234567")).thenReturn(Optional.empty());
+        when(userRepository.findByPhone("3005540394")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(userSaved);
 
         //when
-
         UserDtos.UserResponse response = userService.registerUser(request);
 
         //Then
@@ -96,26 +105,24 @@ public class UserServiceImplTest {
     }
 
     @Test
-
     @DisplayName("Debe crear un empleado con rol DRIVER")
     void shouldRegisterEmployee(){
         //given
         UserDtos.EmployeeCreateRequest request = givenEmployeeRequest(Role.ROLE_DRIVER);
-        User userSaved = givenUser(1L,"employee@gmail.com", Role.ROLE_DRIVER, User.Status.ACTIVE);
+        User userSaved = givenUserWithPhone(1L, "employee@test.com", "3009876543", Role.ROLE_DRIVER, User.Status.ACTIVE);
 
-        when(userRepository.existsByEmail("employee@gmail.com")).thenReturn(false);
+        when(userRepository.existsByEmail("employee@test.com")).thenReturn(false);
         when(userRepository.findByPhone("3009876543")).thenReturn(Optional.empty());
         when(userRepository.save(any(User.class))).thenReturn(userSaved);
 
         //when
-
         UserDtos.UserResponse response = userService.createEmployee(request);
 
         //then
         assertThat(response).isNotNull();
         assertThat(response.role()).isEqualTo(Role.ROLE_DRIVER);
 
-        verify(userRepository,times(1)).save(any(User.class));
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test

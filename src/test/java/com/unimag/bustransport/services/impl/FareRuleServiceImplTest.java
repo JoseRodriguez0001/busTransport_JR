@@ -10,7 +10,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.math.BigDecimal;
@@ -28,7 +30,6 @@ import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("FareRuleService Unit Tests")
 class FareRuleServiceImplTest {
 
     @Mock
@@ -52,23 +53,11 @@ class FareRuleServiceImplTest {
     @Mock
     private BusRepository busRepository;
 
+    @Spy
     private final FareRuleMapper fareRuleMapper = Mappers.getMapper(FareRuleMapper.class);
 
+    @InjectMocks
     private FareRuleServiceImpl fareRuleService;
-
-    @BeforeEach
-    void setUp() {
-        fareRuleService = new FareRuleServiceImpl(
-                fareRuleRepository,
-                routeRepository,
-                stopRepository,
-                passengerRepository,
-                seatRepository,
-                ticketRepository,
-                busRepository,
-                fareRuleMapper
-        );
-    }
 
     private Route givenRoute() {
         return Route.builder()
@@ -183,7 +172,7 @@ class FareRuleServiceImplTest {
         assertThat(response.basePrice()).isEqualByComparingTo(BigDecimal.valueOf(50000));
 
         verify(routeRepository, times(1)).findById(1L);
-        verify(stopRepository, times(2)).findById(anyLong());
+        verify(stopRepository, times(4)).findById(anyLong()); //dos en el create service y dos en validateStopsBelongToRoute
         verify(fareRuleRepository, times(1)).save(any(FareRule.class));
     }
 

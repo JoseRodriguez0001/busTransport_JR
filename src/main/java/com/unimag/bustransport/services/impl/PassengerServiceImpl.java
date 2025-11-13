@@ -17,7 +17,10 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service@Transactional@RequiredArgsConstructor@Slf4j
+@Service
+@Transactional
+@RequiredArgsConstructor
+@Slf4j
 public class PassengerServiceImpl implements PassengerService {
     private final PassengerRepository repository;
     private  final PassengerMapper mapper;
