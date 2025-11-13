@@ -39,28 +39,9 @@ public interface SeatHoldRepository extends JpaRepository<SeatHold, Long> {
             OffsetDateTime now
     );
 
-    @Query("SELECT s FROM SeatHold s WHERE s.expiresAt < CURRENT_TIMESTAMP AND s.status = 'HOLD'")
-    List<SeatHold> findExpiredHolds();
+    Optional<SeatHold> findByTripIdAndSeatNumberAndUserId(Long tripId, String seatNumber, Long userId);
 
-    @Modifying
-    @Query("""
-        DELETE FROM SeatHold h
-        WHERE h.trip.id = :tripId 
-          AND h.seatNumber IN :seatNumbers 
-          AND h.user.id = :userId
-          AND h.status = 'HOLD'
-    """)
-    int deleteByTripIdAndSeatNumbersAndUserId(
-            @Param("tripId") Long tripId,
-            @Param("seatNumbers") List<String> seatNumbers,
-            @Param("userId") Long userId
-    );
+    List<SeatHold> findByStatusAndExpiresAtBefore(SeatHold.Status status, OffsetDateTime expiresAtBefore);
 
-    List<SeatHold> findByTripIdAndSeatNumberInAndUserId(
-            Long tripId,
-            List<String> seatNumbers,
-            Long userId
-    );
-
-    List<SeatHold> findByTripIdAndUserIdAndStatus(Long tripId, Long userId, SeatHold.Status status);
+    List<SeatHold> findByStatus(SeatHold.Status status);
 }

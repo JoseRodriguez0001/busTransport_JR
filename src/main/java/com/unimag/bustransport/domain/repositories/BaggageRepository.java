@@ -12,6 +12,6 @@ public interface BaggageRepository extends JpaRepository<Baggage, Long> {
     List<Baggage> findByTicketId(Long ticketId);
 
     //revisar si se usa o no
-    @Query("SELECT b FROM Baggage b WHERE b.ticket.trip.id = :tripId")
-    List<Baggage> findByTripId(@Param("tripId") Long tripId);
+   // @Query("SELECT b FROM Baggage b WHERE b.ticket.trip.id = :tripId")
+ //   List<Baggage> findByTripId(@Param("tripId") Long tripId);
 }
