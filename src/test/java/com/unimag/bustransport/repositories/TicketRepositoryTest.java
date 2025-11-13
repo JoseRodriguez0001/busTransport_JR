@@ -124,6 +124,8 @@ public class TicketRepositoryTest extends AbstractRepositoryTI {
                 .totalAmount(BigDecimal.valueOf(50000))
                 .paymentMethod(Purchase.PaymentMethod.CARD)
                 .paymentStatus(Purchase.PaymentStatus.CONFIRMED)
+                .paymentReference("455634DF")
+                .createdAt(OffsetDateTime.now())
                 .build();
         return purchaseRepository.save(purchase);
     }

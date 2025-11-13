@@ -37,6 +37,7 @@ public class PurchaseRepositoryTest extends AbstractRepositoryTI{
                 .passwordHash("hash")
                 .role(Role.ROLE_PASSENGER)
                 .createdAt(OffsetDateTime.now())
+                .status(User.Status.ACTIVE)
                 .build();
         return userRepository.save(user);
     }

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -385,14 +386,18 @@ class TripRepositoryTest extends AbstractRepositoryTI {
                 .documentNumber(documentNumber)
                 .birthDate(birthDate)
                 .build();
+        passenger.setCreatedAt(OffsetDateTime.now());
         return passengerRepository.save(passenger);
     }
 
     private User createUser(String email, String password, String phone) {
         User user = User.builder()
+                .name("Jose")
                 .email(email)
                 .passwordHash(password)
                 .phone(phone)
+                .createdAt(OffsetDateTime.now())
+                .status(User.Status.ACTIVE)
                 .role(Role.ROLE_PASSENGER)
                 .build();
         return userRepository.save(user);
@@ -404,6 +409,8 @@ class TripRepositoryTest extends AbstractRepositoryTI {
                 .totalAmount(totalAmount)
                 .paymentMethod(Purchase.PaymentMethod.CARD)
                 .paymentStatus(Purchase.PaymentStatus.CONFIRMED)
+                .paymentReference("3322R")
+                .createdAt(OffsetDateTime.now())
                 .build();
         return purchaseRepository.save(purchase);
     }

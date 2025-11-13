@@ -15,9 +15,6 @@ public interface RouteRepository extends JpaRepository<Route,Long> {
     List<Route> findByOrigin(String origin);
 
     List<Route> findByDestination(String destination);
-    @Query( "SELECT r " +
-            "FROM Route r " +
-            "WHERE r.origin = :origin OR r.destination = :destination")
 
     boolean existsByCode(String code);
 }

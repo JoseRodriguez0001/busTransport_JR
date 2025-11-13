@@ -90,7 +90,7 @@ public class RouteRepositoryTest extends AbstractRepositoryTI{
     @DisplayName("Debe verificar si existe código de ruta")
     void shouldCheckIfCodeExists() {
         // Given
-        givenRoute("R-UNIQUE", "Bogotá", "Medellín");
+        givenRoute("R-UNIQUE", "Bogotá", "Medellin");
 
         // When
         boolean exists = routeRepository.existsByCode("R-UNIQUE");

@@ -47,6 +47,7 @@ public class SeatHoldRepositoryTest extends AbstractRepositoryTI{
                 .passwordHash("hash")
                 .role(Role.ROLE_PASSENGER)
                 .createdAt(OffsetDateTime.now())
+                .status(User.Status.ACTIVE)
                 .build();
         return userRepository.save(user);
     }
@@ -74,6 +75,7 @@ public class SeatHoldRepositoryTest extends AbstractRepositoryTI{
                 .date(LocalDate.now())
                 .departureAt(OffsetDateTime.now())
                 .arrivalAt(OffsetDateTime.now().plusHours(2))
+                .status(Trip.Status.SCHEDULED)
                 .build();
         return tripRepository.save(trip);
     }

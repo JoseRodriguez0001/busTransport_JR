@@ -20,6 +20,7 @@ public class Stop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(name = "\"order\"")
     private Integer order;
     private Double lat;
     private Double lng;

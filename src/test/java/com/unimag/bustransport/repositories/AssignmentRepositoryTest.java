@@ -40,9 +40,9 @@ public class AssignmentRepositoryTest extends AbstractRepositoryTI{
         userRepository.deleteAll();
     }
 
-    private Trip givenTrip() {
+    private Trip givenTrip(String codeRoute,String plateBus) {
         Route route = Route.builder()
-                .code("R001")
+                .code(codeRoute)
                 .origin("A")
                 .destination("B")
                 .distanceKm(100.0)
@@ -51,7 +51,7 @@ public class AssignmentRepositoryTest extends AbstractRepositoryTI{
         routeRepository.save(route);
 
         Bus bus = Bus.builder()
-                .plate("ABC123")
+                .plate(plateBus)
                 .capacity(40)
                 .status(Bus.Status.ACTIVE)
                 .build();
@@ -63,6 +63,7 @@ public class AssignmentRepositoryTest extends AbstractRepositoryTI{
                 .date(LocalDate.now())
                 .departureAt(OffsetDateTime.now())
                 .arrivalAt(OffsetDateTime.now().plusHours(2))
+                .status(Trip.Status.SCHEDULED)
                 .build();
         return tripRepository.save(trip);
     }
@@ -74,6 +75,7 @@ public class AssignmentRepositoryTest extends AbstractRepositoryTI{
                 .passwordHash("hash")
                 .role(role)
                 .createdAt(OffsetDateTime.now())
+                .status(User.Status.ACTIVE)
                 .build();
         return userRepository.save(user);
     }
@@ -84,7 +86,7 @@ public class AssignmentRepositoryTest extends AbstractRepositoryTI{
         // Given
         User driver = givenUser("driver@example.com", Role.ROLE_DRIVER);
         User dispatcher = givenUser("dispatcher@example.com", Role.ROLE_DISPATCHER);
-        Trip trip = givenTrip();
+        Trip trip = givenTrip("rt3344","TZV098");
 
         Assignment assignment = Assignment.builder()
                 .trip(trip)
@@ -108,8 +110,8 @@ public class AssignmentRepositoryTest extends AbstractRepositoryTI{
         // Given
         User driver = givenUser("driver@example.com", Role.ROLE_DRIVER);
         User dispatcher = givenUser("dispatcher@example.com", Role.ROLE_DISPATCHER);
-        Trip trip1 = givenTrip();
-        Trip trip2 = givenTrip();
+        Trip trip1 = givenTrip("JR0101","LLM000");
+        Trip trip2 = givenTrip("RJ0202","LL1");
 
         Assignment assignment1 = Assignment.builder()
                 .trip(trip1)

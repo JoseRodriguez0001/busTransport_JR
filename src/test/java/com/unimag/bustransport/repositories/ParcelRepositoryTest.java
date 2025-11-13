@@ -72,6 +72,7 @@ public class ParcelRepositoryTest extends AbstractRepositoryTI{
                 .date(LocalDate.now())
                 .departureAt(OffsetDateTime.now())
                 .arrivalAt(OffsetDateTime.now().plusHours(2))
+                .status(Trip.Status.SCHEDULED)
                 .build();
         return tripRepository.save(trip);
     }
