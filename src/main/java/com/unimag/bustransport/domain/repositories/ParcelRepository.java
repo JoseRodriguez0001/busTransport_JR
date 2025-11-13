@@ -10,9 +10,7 @@ import java.util.Optional;
 public interface ParcelRepository extends JpaRepository<Parcel,Long> {
     List<Parcel> findByTripId(Long tripId);
     Optional<Parcel> findByCode(String code);
-    List<Parcel> findByStatus(Parcel.Status status);
     List<Parcel> findBySenderPhone(String senderPhone);
-
-    @Query(value = "SELECT * FROM parcels WHERE status = 'IN_TRANSIT' ORDER BY id DESC", nativeQuery = true)
-    List<Parcel> findInTransitNative();
+    List<Parcel> findByReceiverPhone(String receiverPhone);
+    boolean existsByCode(String code);
 }

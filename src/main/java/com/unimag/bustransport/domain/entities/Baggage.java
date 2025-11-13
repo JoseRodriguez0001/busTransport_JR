@@ -25,7 +25,7 @@ public class Baggage {
     @Column(name = "tag_code", unique = true)
     private String tagCode;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ticket_id", nullable = false,
             foreignKey = @ForeignKey(name = "fk_baggage_ticket"))
     private Ticket ticket;

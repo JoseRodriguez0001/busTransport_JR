@@ -10,9 +10,9 @@ public interface AssignmentMapper {
     //quiere decir "no intentes llenar ese atributo de la entidad"
     //target -> objeto destino / source -> objeto fuente u objeto origen
     @Mapping(target = "id", ignore = true)
-    @Mapping(target = "trip", ignore = true)
-    @Mapping(target = "driver", ignore = true)
-    @Mapping(target = "dispatcher", ignore = true)
+    @Mapping(target = "trip.id", source = "tripId")
+    @Mapping(target = "driver.id", source = "driverId")
+    @Mapping(target = "dispatcher.id", source = "dispatcherId")
     @Mapping(target = "assignedAt", ignore = true)
     Assignment toEntity(AssignmentDtos.AssignmentCreateRequest request);
 
@@ -21,11 +21,9 @@ public interface AssignmentMapper {
     @Mapping(source = "trip.route.destination", target = "trip.destination")
     @Mapping(source = "trip.departureAt", target = "trip.departureAt")
     @Mapping(source = "driver.id", target = "driver.id")
-    @Mapping(source = "driver.username", target = "driver.username")
-    @Mapping(source = "driver.fullName", target = "driver.fullName")
+    @Mapping(source = "driver.name", target = "driver.name")
     @Mapping(source = "dispatcher.id", target = "dispatcher.id")
-    @Mapping(source = "dispatcher.username", target = "dispatcher.username")
-    @Mapping(source = "dispatcher.fullName", target = "dispatcher.fullName")
+    @Mapping(source = "dispatcher.name", target = "dispatcher.name")
     AssignmentDtos.AssignmentResponse toResponse(Assignment assignment);
 
     //“Si en el objeto de origen (source) hay un campo con valor null,

@@ -27,13 +27,10 @@ public interface TicketMapper {
     @Mapping(source = "passenger.documentNumber", target = "passenger.documentNumber")
     @Mapping(source = "fromStop.id", target = "fromStop.id")
     @Mapping(source = "fromStop.name", target = "fromStop.name")
-    @Mapping(source = "fromStop.city", target = "fromStop.city")
     @Mapping(source = "toStop.id", target = "toStop.id")
     @Mapping(source = "toStop.name", target = "toStop.name")
-    @Mapping(source = "toStop.city", target = "toStop.city")
     @Mapping(source = "purchase.id", target = "purchase.id")
     @Mapping(source = "purchase.totalAmount", target = "purchase.totalAmount")
-    @Mapping(target = "purchase.paymentStatus", expression = "java(ticket.getPurchase().getPaymentStatus().toString())")
     TicketDtos.TicketResponse toResponse(Ticket ticket);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)

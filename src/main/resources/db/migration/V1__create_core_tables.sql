@@ -54,7 +54,7 @@ CREATE TABLE IF NOT EXISTS stops (
     CONSTRAINT fk_stop_route FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE CASCADE
     );
 
-CREATE UNIQUE INDEX IF NOT EXISTS uq_route_orderindex ON stops(route_id, order_index);
+CREATE UNIQUE INDEX IF NOT EXISTS uq_route_order ON stops(route_id, "order");
 CREATE INDEX IF NOT EXISTS idx_stops_route ON stops(route_id);
 
 -- ---------- fare_rules ----------
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS trips (
     id BIGSERIAL PRIMARY KEY,
     route_id BIGINT NOT NULL,
     bus_id BIGINT NOT NULL,
-    date DATE NOT NULL,
+    "date" DATE NOT NULL,
     departure_at TIMESTAMPTZ,
     arrival_at TIMESTAMPTZ,
     status VARCHAR(30) NOT NULL DEFAULT 'SCHEDULED',
@@ -229,7 +229,7 @@ CREATE TABLE IF NOT EXISTS incidents (
     id BIGSERIAL PRIMARY KEY,
     entity_type VARCHAR(50) NOT NULL,
     entity_id BIGINT NOT NULL,
-    type VARCHAR(50) NOT NULL,
+    "type" VARCHAR(50) NOT NULL,
     note TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
@@ -241,8 +241,8 @@ CREATE INDEX IF NOT EXISTS idx_incidents_type ON incidents(type);
 -- ---------- config ----------
 CREATE TABLE IF NOT EXISTS config (
     id BIGSERIAL PRIMARY KEY,
-    key VARCHAR(100) UNIQUE NOT NULL,
-    value VARCHAR(255) NOT NULL
+    "key" VARCHAR(100) UNIQUE NOT NULL,
+    "value" VARCHAR(255) NOT NULL
     );
 
 CREATE INDEX IF NOT EXISTS idx_config_key ON config(key);
@@ -251,8 +251,8 @@ CREATE INDEX IF NOT EXISTS idx_config_key ON config(key);
 -- ---------- kpis ----------
 CREATE TABLE IF NOT EXISTS kpis (
     id BIGSERIAL PRIMARY KEY,
-    name VARCHAR(100) UNIQUE NOT NULL,
-    value NUMERIC(10,4) NOT NULL,
+    "name" VARCHAR(100) UNIQUE NOT NULL,
+    "value" NUMERIC(10,4) NOT NULL,
     calculated_at TIMESTAMPTZ NOT NULL DEFAULT now()
     );
 

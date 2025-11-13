@@ -10,7 +10,6 @@ import java.util.List;
 
 public interface PurchaseRepository extends JpaRepository<Purchase,Long> {
     List<Purchase> findByUserId(Long userId);
-    List<Purchase> findByPaymentStatus(Purchase.PaymentStatus status);
 
     @Query("SELECT p FROM Purchase p WHERE p.createdAt BETWEEN :start AND :end")
     List<Purchase> findByDateRange(@Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);

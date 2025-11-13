@@ -17,7 +17,6 @@ public interface TripMapper {
     Trip toEntity(TripDtos.TripCreateRequest request);
 
     @Mapping(target = "status", expression = "java(trip.getStatus().toString())")
-    @Mapping(target = "durationMinutes", expression = "java(java.time.temporal.ChronoUnit.MINUTES.between(trip.getDepartureAt(), trip.getArrivalAt()).intValue())")
     @Mapping(target = "route", source = "route")
     @Mapping(target = "bus", source = "bus")
     @Mapping(target = "soldSeats", ignore = true)
@@ -43,6 +42,7 @@ public interface TripMapper {
     @Mapping(target = "tickets", ignore = true)
     @Mapping(target = "parcels", ignore = true)
     @Mapping(target = "id", ignore = true)
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(TripDtos.TripUpdateRequest request, @MappingTarget Trip trip);
 }
 

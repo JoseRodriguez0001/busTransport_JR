@@ -10,7 +10,6 @@ import java.util.Optional;
 
 public interface AssignmentRepository extends JpaRepository<Assignment, Long> {
     Optional<Assignment> findByTripId(Long tripId);
-
     @Query("SELECT a FROM Assignment a WHERE a.driver.id = :driverId")
     List<Assignment> findByDriver(@Param("driverId") Long driverId);
 }

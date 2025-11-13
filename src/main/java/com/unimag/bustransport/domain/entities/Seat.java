@@ -4,7 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "seats")
+@Table(name = "seats",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_seat_bus_number",
+                columnNames = {"bus_id", "number"}
+        ))
 @Getter@Setter
 @NoArgsConstructor@AllArgsConstructor@Builder
 public class Seat {
@@ -21,6 +25,8 @@ public class Seat {
     @ManyToOne
     @JoinColumn(name = "bus_id",foreignKey = @ForeignKey(name = "fk_seat_bus"))
     private Bus bus;
+
+
 
     public enum Type{
         STANDARD,

@@ -19,10 +19,7 @@ public interface SeatHoldMapper {
     @Mapping(source = "trip.route.destination", target = "trip.destination")
     @Mapping(source = "trip.departureAt", target = "trip.departureAt")
     @Mapping(source = "user.id", target = "user.id")
-    @Mapping(source = "user.username", target = "user.username")
+    @Mapping(source = "user.name", target = "user.name")
     SeatHoldDtos.SeatHoldResponse toResponse(SeatHold seatHold);
 
-    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "status", expression = "java(request.status() != null ? com.unimag.bustransport.domain.entities.SeatHold.Status.valueOf(request.status()) : null)")
-    void updateEntityFromRequest(SeatHoldDtos.SeatHoldUpdateRequest request, @MappingTarget SeatHold seatHold);
 }

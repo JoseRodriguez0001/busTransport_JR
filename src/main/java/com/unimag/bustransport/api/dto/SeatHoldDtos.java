@@ -10,13 +10,7 @@ public class SeatHoldDtos {
     public record SeatHoldCreateRequest(
             @NotBlank String seatNumber,
             @NotNull Long tripId,
-            @NotNull Long userId,
-            @NotNull OffsetDateTime expiresAt
-    ) implements Serializable {}
-
-    public record SeatHoldUpdateRequest(
-            String status,
-            OffsetDateTime expiresAt
+            @NotNull Long userId
     ) implements Serializable {}
 
     public record SeatHoldResponse(
@@ -28,6 +22,6 @@ public class SeatHoldDtos {
             UserSummary user
     ) implements Serializable {
         public record TripSummary(Long id, String origin, String destination, OffsetDateTime departureAt) implements Serializable {}
-        public record UserSummary(Long id, String username) implements Serializable {}
+        public record UserSummary(Long id, String name) implements Serializable {}
     }
 }

@@ -31,7 +31,10 @@ public class Purchase {
     private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @Column(name = "created_at", nullable = false)
-    private OffsetDateTime createdAt = OffsetDateTime.now();
+    private OffsetDateTime createdAt;
+
+    @Column(name = "payment_reference")
+    private String paymentReference;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false,

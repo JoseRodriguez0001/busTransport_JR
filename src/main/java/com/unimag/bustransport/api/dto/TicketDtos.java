@@ -37,7 +37,7 @@ public class TicketDtos {
     ) implements Serializable {
         public record TripSummary(Long id, String origin, String destination, OffsetDateTime departureAt) implements Serializable {}
         public record PassengerSummary(Long id, String fullName, String documentNumber) implements Serializable {}
-        public record StopSummary(Long id, String name, String city) implements Serializable {}
+        public record StopSummary(Long id, String name) implements Serializable {}
         public record PurchaseSummary(Long id, BigDecimal totalAmount, String paymentStatus) implements Serializable {}
     }
 }

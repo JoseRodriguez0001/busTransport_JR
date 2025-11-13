@@ -22,13 +22,10 @@ public interface ParcelMapper {
     @Mapping(source = "trip.route.destination", target = "trip.destination")
     @Mapping(source = "fromStop.id", target = "fromStop.id")
     @Mapping(source = "fromStop.name", target = "fromStop.name")
-    @Mapping(source = "fromStop.city", target = "fromStop.city")
     @Mapping(source = "toStop.id", target = "toStop.id")
     @Mapping(source = "toStop.name", target = "toStop.name")
-    @Mapping(source = "toStop.city", target = "toStop.city")
     ParcelDtos.ParcelResponse toResponse(Parcel parcel);
 
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
-    @Mapping(target = "status", expression = "java(request.status() != null ? com.unimag.bustransport.domain.entities.Parcel.Status.valueOf(request.status()) : null)")
     void updateEntityFromRequest(ParcelDtos.ParcelUpdateRequest request, @MappingTarget Parcel parcel);
 }

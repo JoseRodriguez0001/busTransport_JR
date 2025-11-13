@@ -25,7 +25,7 @@ public class Ticket {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Status status = Status.SOLD;
+    private Status status = Status.PENDING;
 
     @Column(name = "qr_code")
     private String qrCode;
@@ -56,6 +56,6 @@ public class Ticket {
     private Purchase purchase;
 
     public enum Status {
-        SOLD, CANCELLED, NO_SHOW
+        PENDING, SOLD, CANCELLED, NO_SHOW
     }
 }
