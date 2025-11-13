@@ -1,9 +1,6 @@
 package com.unimag.bustransport.services.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.unimag.bustransport.api.dto.BaggageDtos;
 import com.unimag.bustransport.api.dto.PurchaseDtos;
-import com.unimag.bustransport.api.dto.ReceiptDto;
 import com.unimag.bustransport.api.dto.TicketDtos;
 import com.unimag.bustransport.domain.entities.*;
 import com.unimag.bustransport.domain.repositories.*;

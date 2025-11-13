@@ -1,7 +1,6 @@
 package com.unimag.bustransport.services;
 
 import com.unimag.bustransport.api.dto.PurchaseDtos;
-import com.unimag.bustransport.api.dto.ReceiptDto;
 
 import java.time.OffsetDateTime;
 import java.util.List;
