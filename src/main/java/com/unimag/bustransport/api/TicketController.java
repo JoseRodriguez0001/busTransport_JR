@@ -5,6 +5,7 @@ import com.unimag.bustransport.api.dto.TicketDtos.TicketResponse;
 import com.unimag.bustransport.services.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,32 +22,33 @@ public class TicketController {
     //UN TICKET SOLO SE CREA AL CREAR UN PURCHASE, NO EXPONEMOS UN CONTROLADOR PARA CREAR UN TICKET POR APARTE
 
 
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponse> get(@PathVariable Long id) {
         return ResponseEntity.ok(service.getTicket(id));
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'DISPATCHER', 'CLERK')")
     @GetMapping("/by-trip/{tripId}")
     public ResponseEntity<List<TicketResponse>> getByTrip(@PathVariable Long tripId) {
         return ResponseEntity.ok(service.getTicketsByTrip(tripId));
     }
-
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/by-purchase/{purchaseId}")
     public ResponseEntity<List<TicketResponse>> getByPurchase(@PathVariable Long purchaseId) {
         return ResponseEntity.ok(service.getTicketsByPurchase(purchaseId));
     }
-
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/by-passenger/{passengerId}")
     public ResponseEntity<List<TicketResponse>> getByPassenger(@PathVariable Long passengerId) {
         return ResponseEntity.ok(service.getTicketsByPassenger(passengerId));
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLERK')")
     @PostMapping("/{id}/generate-qr")
     public ResponseEntity<Void> generateQr(@PathVariable Long id) {
         service.generateQrForTicket(id);
         return ResponseEntity.noContent().build();
     }
-
+    @PreAuthorize("hasAnyRole('DRIVER', 'DISPATCHER', 'CLERK')")
     @PostMapping("/validate-qr")
     public ResponseEntity<TicketDtos.ValidationResponse> validateQr(@RequestParam String qrCode) {
         try {
@@ -57,6 +59,7 @@ public class TicketController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'CLERK')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.deleteTicket(id);

@@ -5,10 +5,13 @@ import com.unimag.bustransport.api.dto.UserDtos.UserCreateRequest;
 import com.unimag.bustransport.api.dto.UserDtos.UserResponse;
 import com.unimag.bustransport.api.dto.UserDtos.UserUpdateRequest;
 import com.unimag.bustransport.domain.entities.Role;
+import com.unimag.bustransport.security.user.CustomUserDetails;
 import com.unimag.bustransport.services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -32,7 +35,7 @@ public class UserController {
                 .toUri();
         return ResponseEntity.created(location).body(userCreated);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/employees")
     public ResponseEntity<UserResponse> createEmployee(@Valid @RequestBody EmployeeCreateRequest req,
                                                        UriComponentsBuilder uriBuilder) {
@@ -43,53 +46,53 @@ public class UserController {
         return ResponseEntity.created(location).body(employeeCreated);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@RequestParam String email,
-                                              @RequestParam String password) {
-        return ResponseEntity.ok(service.login(email, password));
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getMe(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(service.getUserById(userDetails.getUserId()));
     }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> get(@PathVariable Long id) {
-        return ResponseEntity.ok(service.getUserById(id));
-    }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/by-email/{email}")
     public ResponseEntity<UserResponse> getByEmail(@PathVariable String email) {
         return ResponseEntity.ok(service.getUserByEmail(email));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/by-phone/{phone}")
     public ResponseEntity<UserResponse> getByPhone(@PathVariable String phone) {
         return ResponseEntity.ok(service.getUserByPhone(phone));
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/by-role/{role}")
     public ResponseEntity<List<UserResponse>> getByRole(@PathVariable Role role) {
         return ResponseEntity.ok(service.getAllUsersByRole(role));
     }
 
-    @PatchMapping("/{id}")
-    public ResponseEntity<Void> update(@PathVariable Long id,
-                                       @Valid @RequestBody UserUpdateRequest req) {
-        service.updateUser(id, req);
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/me")  // ← Sin {id}
+    public ResponseEntity<Void> updateMe(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody UserUpdateRequest req) {
+        service.updateUser(userDetails.getUserId(), req);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/change-password")
-    public ResponseEntity<Void> changePassword(@PathVariable Long id,
-                                               @RequestParam String oldPassword,
-                                               @RequestParam String newPassword) {
-        service.changePassword(id, oldPassword, newPassword);
+    @PreAuthorize("isAuthenticated()")
+    @PatchMapping("/me/change-password")  // ← Sin {id}
+    public ResponseEntity<Void> changePassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @RequestParam String oldPassword,
+            @RequestParam String newPassword) {
+        service.changePassword(userDetails.getUserId(), oldPassword, newPassword);
         return ResponseEntity.noContent().build();
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/deactivate")
     public ResponseEntity<Void> deactivate(@PathVariable Long id) {
         service.desactivateUser(id);
         return ResponseEntity.noContent().build();
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping("/{id}/reactivate")
     public ResponseEntity<Void> reactivate(@PathVariable Long id) {
         service.reactivateUser(id);

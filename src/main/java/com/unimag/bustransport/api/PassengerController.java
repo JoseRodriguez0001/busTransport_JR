@@ -3,10 +3,13 @@ package com.unimag.bustransport.api;
 import com.unimag.bustransport.api.dto.PassengerDtos.PassengerCreateRequest;
 import com.unimag.bustransport.api.dto.PassengerDtos.PassengerResponse;
 import com.unimag.bustransport.api.dto.PassengerDtos.PassengerUpdateRequest;
+import com.unimag.bustransport.security.user.CustomUserDetails;
 import com.unimag.bustransport.services.PassengerService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -30,29 +33,30 @@ public class PassengerController {
                 .toUri();
         return ResponseEntity.created(location).body(passengerCreated);
     }
-
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}")
     public ResponseEntity<PassengerResponse> get(@PathVariable Long id) {
         return ResponseEntity.ok(service.getPassengerById(id));
     }
-
+    @PreAuthorize("isAuthenticated()")
     @GetMapping("/by-document/{documentNumber}")
     public ResponseEntity<PassengerResponse> getByDocumentNumber(@PathVariable String documentNumber) {
         return ResponseEntity.ok(service.finByDocumentNumber(documentNumber));
     }
-
-    @GetMapping("/by-user/{userId}")
-    public ResponseEntity<List<PassengerResponse>> getByUser(@PathVariable Long userId) {
-        return ResponseEntity.ok(service.getPassengerByUser(userId));
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/my-passengers")
+    public ResponseEntity<List<PassengerResponse>> getMyPassengers(
+            @AuthenticationPrincipal CustomUserDetails userDetails) {  // ← AGREGAR ESTO
+        return ResponseEntity.ok(service.getPassengerByUser(userDetails.getUserId()));
     }
-
+    @PreAuthorize("isAuthenticated()")
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable Long id,
                                        @Valid @RequestBody PassengerUpdateRequest req) {
         service.updatePassenger(id, req);
         return ResponseEntity.noContent().build();
     }
-
+    @PreAuthorize("isAuthenticated()")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.deletePassenger(id);
