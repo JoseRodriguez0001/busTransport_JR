@@ -11,6 +11,7 @@ import com.unimag.bustransport.services.UserService;
 import com.unimag.bustransport.services.mapper.UserMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     // TODO: Inyectar cuando se implemente Spring Security
     // private final PasswordEncoder passwordEncoder;
@@ -62,9 +64,7 @@ public class UserServiceImpl implements UserService {
         //  Forzar rol PASSENGER en registro público
         user.setRole(Role.ROLE_PASSENGER);
 
-        // TODO: Encriptar password cuando se implemente Spring Security
-        // user.setPasswordHash(passwordEncoder.encode(request.password()));
-        user.setPasswordHash(request.password());
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
 
         user.setStatus(User.Status.ACTIVE);
         user.setCreatedAt(OffsetDateTime.now());
@@ -76,9 +76,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(savedUser);
     }
 
-    // ⭐ NUEVO: Crear empleados (CLERK, DRIVER, DISPATCHER) y ADMIN
-    // TODO: Agregar @PreAuthorize("hasRole('ADMIN')") cuando implementes Spring Security
-    @Override
+     @Override
     public UserDtos.UserResponse createEmployee(UserDtos.EmployeeCreateRequest request) {
         log.debug("Creating employee with email: {} and role: {}", request.email(), request.role());
 
@@ -115,9 +113,9 @@ public class UserServiceImpl implements UserService {
         user.setPhone(request.phone());
         user.setRole(request.role());  //  Ahora sí acepta el rol (ADMIN, CLERK, DRIVER, DISPATCHER)
 
-        // Generar contraseña temporal
-        String tempPassword = generateTemporaryPassword();
-        user.setPasswordHash(tempPassword);
+         // Generar contraseña temporal y encriptarla
+         String tempPassword = generateTemporaryPassword();
+         user.setPasswordHash(passwordEncoder.encode(tempPassword));
 
         user.setStatus(User.Status.ACTIVE);
         user.setCreatedAt(OffsetDateTime.now());
@@ -127,13 +125,11 @@ public class UserServiceImpl implements UserService {
         log.info("Employee created with ID: {} and role: {}. Temporary password: {}",
                 savedUser.getId(), savedUser.getRole(), tempPassword);
 
-        // TODO: Enviar email con contraseña temporal cuando implementes email service
-        // emailService.sendTemporaryPassword(savedUser.getEmail(), tempPassword);
 
         return userMapper.toResponse(savedUser);
     }
 
-    @Override
+    /*@Override
     @Transactional(readOnly = true)
     public UserDtos.UserResponse login(String email, String password) {
         log.debug("Login attempt for email: {}", email);
@@ -160,7 +156,7 @@ public class UserServiceImpl implements UserService {
 
         // TODO: Retornar JWT token cuando implementes Spring Security
         return userMapper.toResponse(user);
-    }
+    }*/
 
     @Override
     public void updateUser(Long id, UserDtos.UserUpdateRequest request) {
@@ -216,9 +212,8 @@ public class UserServiceImpl implements UserService {
                     );
                 });
 
-        // Validar contraseña actual
-        // TODO: Usar passwordEncoder.matches() cuando implementes Spring Security
-        if (!user.getPasswordHash().equals(oldPassword)) {
+        // Validar contraseña actual con BCrypt
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             log.error("Invalid old password for user ID: {}", id);
             throw new InvalidCredentialsException("Invalid old password");
         }
@@ -232,8 +227,8 @@ public class UserServiceImpl implements UserService {
         // Validar fortaleza de contraseña
         validatePasswordStrength(newPassword);
 
-        // TODO: Encriptar cuando implementes Spring Security
-        user.setPasswordHash(newPassword);
+        // Encriptar nueva contraseña
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
         log.info("Password changed successfully for user ID: {}", id);
