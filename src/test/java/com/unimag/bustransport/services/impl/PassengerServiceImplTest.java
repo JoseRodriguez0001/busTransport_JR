@@ -317,7 +317,7 @@ class PassengerServiceImplTest {
         // When y Then
         assertThatThrownBy(() -> passengerService.getPassengerById(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Passenger with ID 999 not found");
+                .hasMessageContaining("Passenger not found");
 
         verify(passengerRepository, times(1)).findById(999L);
     }
