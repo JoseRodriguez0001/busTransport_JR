@@ -40,4 +40,6 @@ public class TicketDtos {
         public record StopSummary(Long id, String name) implements Serializable {}
         public record PurchaseSummary(Long id, BigDecimal totalAmount, String paymentStatus) implements Serializable {}
     }
+
+    public record ValidationResponse(boolean valid, String message) implements Serializable {}
 }

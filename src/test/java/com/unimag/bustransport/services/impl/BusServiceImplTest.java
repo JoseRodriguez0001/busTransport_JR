@@ -16,10 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mapstruct.factory.Mappers;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
@@ -32,7 +29,6 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("BusService Unit Tests")
 class BusServiceImplTest {
 
     @Mock
@@ -41,19 +37,17 @@ class BusServiceImplTest {
     @Mock
     private SeatRepository seatRepository;
 
-    private final BusMapper busMapper = Mappers.getMapper(BusMapper.class);
-    private final SeatMapper seatMapper = Mappers.getMapper(SeatMapper.class);
+    @Spy
+    private BusMapper busMapper = Mappers.getMapper(BusMapper.class);
+
+    @Spy
+    private SeatMapper seatMapper = Mappers.getMapper(SeatMapper.class);
 
     @InjectMocks
     private BusServiceImpl busService;
 
     @Captor
     private ArgumentCaptor<List<Seat>> seatsCaptor;
-
-    @BeforeEach
-    void setUp() {
-        busService = new BusServiceImpl(busRepository, seatRepository, busMapper, seatMapper);
-    }
 
     private Bus givenBus(Long id, String plate, Integer capacity, Bus.Status status) {
         return Bus.builder()
@@ -63,6 +57,7 @@ class BusServiceImplTest {
                 .amenities(new ArrayList<>(List.of("WiFi", "AC")))
                 .status(status)
                 .seats(new ArrayList<>())
+                .trips(new ArrayList<>())
                 .build();
     }
 
@@ -116,7 +111,6 @@ class BusServiceImplTest {
         verify(busRepository, times(1)).save(any(Bus.class));
         verify(seatRepository, times(1)).saveAll(seatsCaptor.capture());
 
-        // Verificar que se crearon 40 asientos
         List<Seat> capturedSeats = seatsCaptor.getValue();
         assertThat(capturedSeats).hasSize(40);
         assertThat(capturedSeats.get(0).getNumber()).isEqualTo("1A");
@@ -142,12 +136,10 @@ class BusServiceImplTest {
         verify(seatRepository, times(1)).saveAll(seatsCaptor.capture());
 
         List<Seat> capturedSeats = seatsCaptor.getValue();
-        
-        // Primera fila (1A, 1B, 1C, 1D) debe ser PREFERENCIAL
+
         assertThat(capturedSeats.subList(0, 4))
                 .allMatch(seat -> seat.getType() == Seat.Type.PREFERENTIAL);
 
-        // Resto debe ser STANDARD
         assertThat(capturedSeats.subList(4, capturedSeats.size()))
                 .allMatch(seat -> seat.getType() == Seat.Type.STANDARD);
     }
@@ -164,7 +156,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.createBus(request))
                 .isInstanceOf(DuplicateResourceException.class)
-                .hasMessageContaining("Ya existe un bus con la placa 'ABC123'");
+                .hasMessageContaining("Bus already exists with plate 'ABC123'");
 
         verify(busRepository, times(1)).findByPlate("ABC123");
         verify(busRepository, never()).save(any(Bus.class));
@@ -182,7 +174,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.createBus(request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("La capacidad debe ser múltiplo de 4");
+                .hasMessageContaining("capacity must be multiplo de 4");
 
         verify(busRepository, never()).save(any(Bus.class));
     }
@@ -216,7 +208,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.updateBus(999L, request))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Bus con ID 999 no encontrado");
+                .hasMessageContaining("Bus not found");
 
         verify(busRepository, times(1)).findById(999L);
         verify(busRepository, never()).save(any(Bus.class));
@@ -228,7 +220,7 @@ class BusServiceImplTest {
         // Given
         Bus existingBus = givenBus(1L, "ABC123", 40, Bus.Status.ACTIVE);
         BusDtos.BusUpdateRequest request = new BusDtos.BusUpdateRequest(
-                37,  // No es múltiplo de 4
+                37,
                 List.of("WiFi"),
                 Bus.Status.ACTIVE
         );
@@ -238,7 +230,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.updateBus(1L, request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("La capacidad debe ser múltiplo de 4");
+                .hasMessageContaining("capacity must be multiplo de 4");
 
         verify(busRepository, never()).save(any(Bus.class));
     }
@@ -258,7 +250,6 @@ class BusServiceImplTest {
         // Then
         verify(busRepository, times(1)).findById(1L);
         verify(busRepository, times(1)).save(bus);
-        // El status debería cambiar a RETIRED (verificamos que save fue llamado)
     }
 
     @Test
@@ -270,12 +261,11 @@ class BusServiceImplTest {
         // When y Then
         assertThatThrownBy(() -> busService.deleteBus(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Bus con ID 999 no encontrado");
+                .hasMessageContaining("Bus not found");
 
         verify(busRepository, times(1)).findById(999L);
         verify(busRepository, never()).save(any(Bus.class));
     }
-
 
     @Test
     @DisplayName("Debe obtener un bus por ID")
@@ -305,7 +295,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.getBus(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Bus con ID 999 no encontrado");
+                .hasMessageContaining("Bus with ID 999 not found");
 
         verify(busRepository, times(1)).findById(999L);
     }
@@ -315,8 +305,8 @@ class BusServiceImplTest {
     void shouldGetAllBuses() {
         // Given
         List<Bus> buses = List.of(
-            givenBus(1L, "BUS001", 40, Bus.Status.ACTIVE),
-            givenBus(2L, "BUS002", 44, Bus.Status.ACTIVE)
+                givenBus(1L, "BUS001", 40, Bus.Status.ACTIVE),
+                givenBus(2L, "BUS002", 44, Bus.Status.ACTIVE)
         );
 
         when(busRepository.findAll()).thenReturn(buses);
@@ -352,9 +342,9 @@ class BusServiceImplTest {
         // Given
         Bus bus = givenBus(1L, "ABC123", 40, Bus.Status.ACTIVE);
         List<Seat> seats = List.of(
-            givenSeat(1L, "1A", bus),
-            givenSeat(2L, "1B", bus),
-            givenSeat(3L, "1C", bus)
+                givenSeat(1L, "1A", bus),
+                givenSeat(2L, "1B", bus),
+                givenSeat(3L, "1C", bus)
         );
         bus.setSeats(seats);
 
@@ -380,7 +370,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.getAllSeatsByBusId(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Bus con ID 999 no encontrado");
+                .hasMessageContaining("Bus with ID 999 not found");
 
         verify(busRepository, times(1)).findByIdWithSeats(999L);
     }

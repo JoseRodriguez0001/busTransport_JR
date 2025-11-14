@@ -320,6 +320,25 @@ class ParcelServiceImplTest {
     }
 
     @Test
+    @DisplayName("Debe obtener parcels por reciever phone")
+    void shouldGetParcelsByReceiverPhone() {
+        // Given
+        Route route = givenRoute();
+        Stop fromStop = givenStop(1L, "Stop 1", 1, route);
+        Stop toStop = givenStop(2L, "Stop 2", 2, route);
+        List<Parcel> parcels = List.of(givenParcel(fromStop, toStop, Parcel.Status.CREATED));
+
+        when(parcelRepository.findByReceiverPhone("3009876543")).thenReturn(parcels);
+
+        // When
+        List<ParcelDtos.ParcelResponse> result = parcelService.getParcelsByReceiver("3009876543");
+
+        // Then
+        assertThat(result).hasSize(1);
+        verify(parcelRepository, times(1)).findByReceiverPhone("3009876543");
+    }
+
+    @Test
     @DisplayName("Debe obtener parcel por código")
     void shouldGetParcelByCode() {
         // Given

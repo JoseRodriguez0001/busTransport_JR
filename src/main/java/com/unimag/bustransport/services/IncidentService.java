@@ -9,6 +9,6 @@ public interface IncidentService {
     IncidentDtos.IncidentResponse createIncident(IncidentDtos.IncidentCreateRequest request);
     void updateIncident(Long incidentId,IncidentDtos.IncidentUpdateRequest request);
     void deleteIncident(Long incidentId);
-    List<IncidentDtos.IncidentResponse> findByIncidentByType(Incident.EntityType type);
+    List<IncidentDtos.IncidentResponse> findByIncidentByType(Incident.EntityType type); //por tipo de entidad
     List<IncidentDtos.IncidentResponse> findIncidentsRecentByType(Incident.Type type);
 }

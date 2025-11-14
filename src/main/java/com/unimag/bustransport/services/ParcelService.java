@@ -7,7 +7,7 @@ import java.util.List;
 public interface ParcelService {
     ParcelDtos.ParcelResponse createParcel(ParcelDtos.ParcelCreateRequest request);
 
-    //solo actualiza datos como phone, stops, etc. NO trips
+    //solo actualiza datos como phone, stops, etc. NO trips. Actualiza si aun está en CREATED.
     void updateParcel(Long parcelId, ParcelDtos.ParcelUpdateRequest request);
 
     void assignTrip(Long parcelId, Long tripId);

@@ -25,5 +25,5 @@ public class SeatDtos {
             Boolean occupied
     ) implements Serializable {}
 
-
+    public record AvailabilityResponse(boolean available) implements Serializable {}
 }
