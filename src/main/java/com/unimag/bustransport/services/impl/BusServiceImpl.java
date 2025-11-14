@@ -90,6 +90,13 @@ public class BusServiceImpl implements BusService {
                 ()-> new NotFoundException("Bus not found")
         );
 
+        if (request.capacity() % COLUMS != 0) {
+            log.warn("capacity {} no es multiplo de {}",request.capacity(),COLUMS);
+            throw new IllegalArgumentException(
+                    String.format("capacity must be multiplo de %d", COLUMS)
+            );
+        }
+
         mapper.updateEntityFromRequest(request,bus);
         repository.save(bus);
     }
