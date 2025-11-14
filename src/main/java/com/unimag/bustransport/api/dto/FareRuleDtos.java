@@ -37,4 +37,6 @@ public class FareRuleDtos {
         public record RouteSummary(Long id, String code, String name) implements Serializable {}
         public record StopSummary(Long id, String name, Integer order) implements Serializable {}
     }
+
+    public record PriceResponse(BigDecimal price) implements Serializable {}
 }

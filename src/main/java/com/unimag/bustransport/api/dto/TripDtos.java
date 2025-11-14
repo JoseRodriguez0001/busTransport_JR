@@ -41,6 +41,6 @@ public class TripDtos {
         public record BusSummary(Long id, String plate, Integer capacity) implements Serializable {}
     }
 
-
+    public record StatisticsResponse(Long soldSeats) implements Serializable {}
 
 }

@@ -24,4 +24,6 @@ public class SeatHoldDtos {
         public record TripSummary(Long id, String origin, String destination, OffsetDateTime departureAt) implements Serializable {}
         public record UserSummary(Long id, String name) implements Serializable {}
     }
+    public record HoldCheckResponse(boolean isOnHold) implements Serializable {}
+    public record CleanupResponse(int count, String action) implements Serializable {}
 }
