@@ -10,7 +10,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -26,7 +25,6 @@ public class TripController {
 
     private final TripService service;
 
-    @PreAuthorize("hasAnyRole('ADMIN','DISPATCHER')")
     @PostMapping
     public ResponseEntity<TripResponse> create(@Valid @RequestBody TripCreateRequest req,
                                                UriComponentsBuilder uriBuilder) {
@@ -54,13 +52,13 @@ public class TripController {
     public ResponseEntity<List<SeatResponse>> getSeats(@PathVariable Long id) {
         return ResponseEntity.ok(service.getSeats(id));
     }
-    @PreAuthorize("hasAnyRole('ADMIN', 'DISPATCHER', 'CLERK')")
+
     @GetMapping("/{id}/statistics")
     public ResponseEntity<TripDtos.StatisticsResponse> getStatistics(@PathVariable Long id) {
         var soldSeats = service.getTripStatistics(id);
         return ResponseEntity.ok(new TripDtos.StatisticsResponse(soldSeats));
     }
-    @PreAuthorize("hasAnyRole('ADMIN','DISPATCHER')")
+
     @PatchMapping("/{id}")
     public ResponseEntity<Void> update(@PathVariable Long id,
                                        @Valid @RequestBody TripUpdateRequest req) {
@@ -68,8 +66,6 @@ public class TripController {
         return ResponseEntity.noContent().build();
     }
 
-
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         service.deleteTrip(id);

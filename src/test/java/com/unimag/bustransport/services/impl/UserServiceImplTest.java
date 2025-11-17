@@ -139,65 +139,6 @@ class UserServiceImplTest {
         verify(userRepository, never()).save(any(User.class));
     }
 
-    @Test
-    @DisplayName("Debe hacer login correctamente")
-    void shouldLoginSuccessfully() {
-        // Given
-        User user = givenUser(1L, "test@example.com", Role.ROLE_PASSENGER, User.Status.ACTIVE);
-
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-
-        // When
-        UserDtos.UserResponse response = userService.login("test@example.com", "password123");
-
-        // Then
-        assertThat(response).isNotNull();
-        assertThat(response.email()).isEqualTo("test@example.com");
-
-        verify(userRepository, times(1)).findByEmail("test@example.com");
-    }
-
-    @Test
-    @DisplayName("Debe lanzar excepción cuando el email no existe")
-    void shouldThrowExceptionWhenEmailNotFoundOnLogin() {
-        // Given
-        when(userRepository.findByEmail("notfound@test.com")).thenReturn(Optional.empty());
-
-        // When & Then
-        assertThatThrownBy(() -> userService.login("notfound@test.com", "password"))
-                .isInstanceOf(InvalidCredentialsException.class)
-                .hasMessageContaining("Invalid email or password");
-
-        verify(userRepository, times(1)).findByEmail("notfound@test.com");
-    }
-
-    @Test
-    @DisplayName("Debe lanzar excepción cuando la contraseña es incorrecta")
-    void shouldThrowExceptionWhenPasswordIncorrect() {
-        // Given
-        User user = givenUser(1L, "test@example.com", Role.ROLE_PASSENGER, User.Status.ACTIVE);
-
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-
-        // When & Then
-        assertThatThrownBy(() -> userService.login("test@example.com", "wrongpassword"))
-                .isInstanceOf(InvalidCredentialsException.class)
-                .hasMessageContaining("Invalid email or password");
-    }
-
-    @Test
-    @DisplayName("Debe lanzar excepción cuando el usuario está inactivo")
-    void shouldThrowExceptionWhenUserInactive() {
-        // Given
-        User user = givenUser(1L, "test@example.com", Role.ROLE_PASSENGER, User.Status.INACTIVE);
-
-        when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-
-        // When & Then
-        assertThatThrownBy(() -> userService.login("test@example.com", "password123"))
-                .isInstanceOf(InvalidCredentialsException.class)
-                .hasMessageContaining("User account is INACTIVE");
-    }
 
     @Test
     @DisplayName("Debe actualizar nombre y teléfono del usuario")

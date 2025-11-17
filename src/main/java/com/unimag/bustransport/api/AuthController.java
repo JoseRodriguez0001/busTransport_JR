@@ -19,7 +19,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
     
@@ -33,7 +33,7 @@ public class AuthController {
             @Valid @RequestBody UserDtos.UserCreateRequest request,
             UriComponentsBuilder uriBuilder
     ) {
-        log.info("Nuevo registro de usuario: {}", request.email());
+        log.info("New User register: {}", request.email());
         
         UserDtos.UserResponse userCreated = userService.registerUser(request);
         
@@ -48,7 +48,7 @@ public class AuthController {
     public ResponseEntity<AuthDtos.AuthResponse> login(
             @Valid @RequestBody AuthDtos.LoginRequest request
     ) {
-        log.info("Intento de login: {}", request.email());
+        log.info("login attempt: {}", request.email());
         
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -75,7 +75,7 @@ public class AuthController {
                 )
         );
         
-        log.info("Login exitoso: {} con rol {}", request.email(), userDetails.getRole());
+        log.info("Login successfully: {} with role {}", request.email(), userDetails.getRole());
         
         return ResponseEntity.ok(response);
     }
@@ -87,7 +87,7 @@ public class AuthController {
         log.info("Solicitud de renovación de token");
         
          if (!jwtService.isRefreshTokenValid(request.refreshToken())) {
-            log.error("Refresh token inválido o expirado");
+            log.error("Refresh token invalid or expired");
             throw new IllegalArgumentException("Invalid or expired refresh token");
         }
         
@@ -102,7 +102,7 @@ public class AuthController {
                 jwtService.extractExpiration(newAccessToken).getTime() / 1000
         );
         
-        log.info("Token renovado exitosamente para usuario: {}", userDetails.getEmail());
+        log.info("Token renovated successfully for User: {}", userDetails.getEmail());
         
         return ResponseEntity.ok(response);
     }
