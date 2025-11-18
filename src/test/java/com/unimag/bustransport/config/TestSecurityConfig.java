@@ -15,12 +15,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.testcontainers.shaded.com.trilead.ssh2.auth.AuthenticationManager;
 
-/**
- * Configuración de seguridad para tests de controladores.
- * Deshabilita toda la seguridad para facilitar el testing de endpoints.
- *
- * Uso: Agregar @Import(TestSecurityConfig.class) en los tests de controladores con @WebMvcTest
- */
+
 @TestConfiguration
 public class TestSecurityConfig {
 

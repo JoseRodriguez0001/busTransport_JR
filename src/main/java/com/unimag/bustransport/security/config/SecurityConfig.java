@@ -1,6 +1,8 @@
 package com.unimag.bustransport.security.config;
 
 import com.unimag.bustransport.security.jwt.JwtAuthenticationFilter;
+import com.unimag.bustransport.security.jwt.JwtService;
+import com.unimag.bustransport.security.user.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -25,7 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
@@ -186,7 +188,7 @@ public class SecurityConfig {
 
                 .authenticationProvider(authenticationProvider())
 
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -208,4 +210,11 @@ public class SecurityConfig {
     ) throws Exception {
         return config.getAuthenticationManager();
     }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter(JwtService jwtService,
+                                                           CustomUserDetailsService userDetailsService) {
+        return new JwtAuthenticationFilter(jwtService, userDetailsService);
+    }
+
 }
