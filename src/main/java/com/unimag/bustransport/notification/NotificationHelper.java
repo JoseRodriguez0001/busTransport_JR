@@ -97,6 +97,16 @@ public class NotificationHelper {
         notificationFactory.send(request);
     }
 
+    public void cancelTicket(Ticket ticket, NotificationType type) {
+
+        String message = "Ticket cancelled";
+
+        String phone = ticket.getPassenger().getPhoneNumber();
+
+        NotificationRequest request = new NotificationRequest(phone, message, type);
+        notificationFactory.send(request);
+    }
+
     private String formatMoney(BigDecimal amount) {
         return String.format("%,.2f", amount);
     }

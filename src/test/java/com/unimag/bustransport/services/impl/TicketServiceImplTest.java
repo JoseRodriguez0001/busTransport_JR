@@ -338,6 +338,14 @@ class TicketServiceImplTest {
                 .isInstanceOf(InvalidCredentialsException.class)
                 .hasMessageContaining("El ticket no está activo (status: PENDING)");
     }
+
+    @Test
+    @DisplayName("Debe hacer reembolso de ticket")
+    void refundTicketSuccesfully() {
+        Ticket ticket = createTicket(1L,"5A",trip,passenger,fromStop,toStop,purchase);
+        ticket.setStatus(Ticket.Status.SOLD);
+        //TODO
+    }
     @Test
     @DisplayName("Debe limpiar tickets PENDING expirados exitosamente")
     void expireOldTickets_ShouldCleanupExpiredTickets() {

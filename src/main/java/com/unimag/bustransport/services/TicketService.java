@@ -22,5 +22,9 @@ public interface TicketService {
 
     void validateQrForTicket(String qrCode);
 
+    void processNoshows();
+
+    void refundTicket(Long ticketId, Long userId);
+
     int expireOldTickets();
 }

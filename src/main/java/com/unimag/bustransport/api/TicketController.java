@@ -2,9 +2,11 @@ package com.unimag.bustransport.api;
 
 import com.unimag.bustransport.api.dto.TicketDtos;
 import com.unimag.bustransport.api.dto.TicketDtos.TicketResponse;
+import com.unimag.bustransport.security.user.CustomUserDetails;
 import com.unimag.bustransport.services.TicketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -55,6 +57,15 @@ public class TicketController {
         } catch (Exception e) {
             return ResponseEntity.ok(new TicketDtos.ValidationResponse(false, e.getMessage()));
         }
+    }
+
+    @PostMapping("/{id}/refund-ticket")
+    public ResponseEntity<TicketDtos.ValidationResponse> refundTicket(
+            @PathVariable Long id,
+            @AuthenticationPrincipal CustomUserDetails user) {
+
+        service.refundTicket(id, user.getUserId());
+        return  ResponseEntity.ok(new TicketDtos.ValidationResponse(true, "Ticket refunded"));
     }
 
     @DeleteMapping("/{id}")

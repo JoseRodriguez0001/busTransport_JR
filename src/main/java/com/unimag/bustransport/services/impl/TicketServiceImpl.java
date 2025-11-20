@@ -6,14 +6,20 @@ import com.unimag.bustransport.domain.repositories.*;
 import com.unimag.bustransport.exception.DuplicateResourceException;
 import com.unimag.bustransport.exception.InvalidCredentialsException;
 import com.unimag.bustransport.exception.NotFoundException;
+import com.unimag.bustransport.notification.NotificationHelper;
+import com.unimag.bustransport.notification.NotificationType;
+import com.unimag.bustransport.services.ConfigService;
 import com.unimag.bustransport.services.TicketService;
 import com.unimag.bustransport.services.mapper.TicketMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -30,9 +36,11 @@ public class TicketServiceImpl implements TicketService {
     private final PassengerRepository passengerRepository;
     private final StopRepository stopRepository;
     private final PurchaseRepository purchaseRepository;
+    private final ConfigService configService;
     private final TicketMapper ticketMapper;
 
     private static final int TICKET_CLEANUP_MINUTES = 15;
+    private final NotificationHelper notificationHelper;
 
     @Override
     public TicketDtos.TicketResponse createTicket(TicketDtos.TicketCreateRequest request) {
@@ -119,6 +127,8 @@ public class TicketServiceImpl implements TicketService {
             );
         }
 
+
+
         // 5. Crear entidad y establecer relaciones
         Ticket ticket = ticketMapper.toEntity(request);
         ticket.setTrip(trip);
@@ -127,7 +137,6 @@ public class TicketServiceImpl implements TicketService {
         ticket.setToStop(toStop);
         ticket.setPurchase(purchase);
         ticket.setStatus(Ticket.Status.PENDING);  // Crear en PENDING
-
         // 6. NO generar QR todavía (se genera al confirmar purchase)
 
         // 7. Guardar ticket
@@ -245,10 +254,92 @@ public class TicketServiceImpl implements TicketService {
             );
         }
 
+        ticket.setStatus(Ticket.Status.BOARDED);
+        ticketRepository.save(ticket);
         log.info("QR validated successfully for ticket ID: {}", ticket.getId());
     }
 
-// Limpiar tickets PENDING antiguos
+    @Override
+    @Scheduled(fixedRate = 60000, initialDelay = 30000)
+    public void processNoshows() {
+        try {
+            OffsetDateTime threshold = OffsetDateTime.now().plusMinutes(5);
+            List<Ticket> tickets = ticketRepository.findTicketNoShow(threshold);
+
+            for (Ticket ticket : tickets) {
+                try {
+
+                    if (ticket.getStatus() != Ticket.Status.SOLD) {
+                        log.debug("Ticket {} status is {} -> skipping", ticket.getId(), ticket.getStatus());
+                        continue;
+                    }
+
+                    ticket.setStatus(Ticket.Status.NO_SHOW);
+
+                    ticketRepository.save(ticket);
+
+                } catch (Exception e) {
+                    log.error("Failed to process ticket noshow", e);
+                }
+            }
+        }catch (Exception e) {
+            log.error("Error processing ", e);
+        }
+    }
+
+    @Override
+    public void refundTicket(Long ticketId, Long userId) {
+
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(()-> {return new NotFoundException(String.format("Ticket with ID %d not found", ticketId));});
+
+        if (!ticket.getPurchase().getUser().getId().equals(userId)) {
+            throw new InvalidCredentialsException("You can´t refund this Ticket");
+        }
+
+        if (ticket.getStatus() != Ticket.Status.SOLD) {
+            throw new InvalidCredentialsException("Ticket status is invalid");
+        }
+
+        Trip trip = ticket.getTrip();
+        if (trip.getDepartureAt().isBefore(OffsetDateTime.now())) {
+            throw new IllegalStateException("You can´t refund past trips");
+        }
+
+        long minutesDiff = Duration
+                .between(OffsetDateTime.now(), trip.getDepartureAt())
+                .toMinutes();
+
+        BigDecimal refundPercent = BigDecimal.ZERO;
+        if (minutesDiff >= 24 * 60) {
+            refundPercent = configService.getValueAsBigDecimal("refund.>24");
+        } else if (minutesDiff >= 2 * 60) {
+            refundPercent = configService.getValueAsBigDecimal("refund.2to24");
+        } else {
+            refundPercent = configService.getValueAsBigDecimal("refund.<2");
+        }
+
+        BigDecimal refundAmount = ticket.getPrice().multiply(refundPercent);
+
+        Purchase purchase = ticket.getPurchase();
+        purchase.setTotalAmount(purchase.getTotalAmount().subtract(refundAmount));
+        purchaseRepository.save(purchase);
+
+        ticket.setStatus(Ticket.Status.CANCELLED);
+        ticketRepository.save(ticket);
+
+        try {
+        notificationHelper.cancelTicket(ticket, NotificationType.WHATSAPP);
+        } catch (Exception e){
+            log.error("Error canceling ticket notification", e);
+        }
+
+        log.info("Ticket refunded successfully for ticket ID: {}", ticket.getId());
+    }
+
+
+
+    // Limpiar tickets PENDING antiguos
     @Override
     @Scheduled(cron = "0 */5 * * * *")  // Cada 5 minutos
     public int expireOldTickets() {
