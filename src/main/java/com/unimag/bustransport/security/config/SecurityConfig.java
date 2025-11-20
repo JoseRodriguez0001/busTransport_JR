@@ -39,8 +39,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // ========== ENDPOINTS PÚBLICOS ==========
                         .requestMatchers(
-                                "/api/v1/users/register",
-                                "/api/v1/users/login",
+                                "/api/v1/auth/register",
+                                "/api/v1/auth/login",
+                                  "/api/v1/auth/refresh-token",
                                 "/error"
                         ).permitAll()
 

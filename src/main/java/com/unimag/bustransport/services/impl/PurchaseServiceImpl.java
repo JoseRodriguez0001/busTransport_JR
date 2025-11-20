@@ -54,6 +54,10 @@ public class PurchaseServiceImpl implements PurchaseService {
                         String.format("Trip with ID %d not found", tripId)
                 ));
 
+        if (trip.getStatus() != Trip.Status.SCHEDULED){
+            throw new IllegalStateException("Cannot create purchase for trip with ID " + tripId);
+        }
+
         // 3. Validar que los SeatHolds estén activos
         List<String> seatNumbers = request.tickets().stream()
                 .map(PurchaseDtos.PurchaseCreateRequest.TicketRequest::seatNumber)
