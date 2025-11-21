@@ -4,7 +4,6 @@ import com.unimag.bustransport.domain.entities.Bus;
 import com.unimag.bustransport.domain.entities.Seat;
 import com.unimag.bustransport.domain.repositories.BusRepository;
 import com.unimag.bustransport.domain.repositories.SeatRepository;
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,9 +42,6 @@ public class BusRepositoryTest extends AbstractRepositoryTI {
         return busRepository.save(bus);
     }
 
-    private Bus givenActiveBus() {
-        return givenBus("ABC123", 40, Bus.Status.ACTIVE);
-    }
 
     private Seat givenSeat(Bus bus, String seatNumber) {
         Seat seat = Seat.builder()
