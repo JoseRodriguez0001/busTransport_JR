@@ -76,15 +76,6 @@ public class PassengerRepositoryTest extends AbstractRepositoryTI {
                 .build();
     }
 
-    private Passenger givenPassenger() {
-        return passengerRepository.save(buildPassenger());
-    }
-
-    private Passenger givenPassengerWithUser(User user) {
-        Passenger passenger = buildPassenger("María López", "CC", "987654321", user);
-        return passengerRepository.save(passenger);
-    }
-
     private Passenger givenPassengerWithDocument(String documentNumber) {
         Passenger passenger = buildPassenger("Carlos Ruiz", "CC", documentNumber, null);
         return passengerRepository.save(passenger);
@@ -227,7 +218,8 @@ public class PassengerRepositoryTest extends AbstractRepositoryTI {
         assertThat(exists).isFalse();
     }
 
-    // ==================== TESTS EDGE CASES ====================
+
+    // TESTS EDGE CASES
 
     @Test
     @DisplayName("Debe permitir múltiples pasajeros con el mismo número de documento")

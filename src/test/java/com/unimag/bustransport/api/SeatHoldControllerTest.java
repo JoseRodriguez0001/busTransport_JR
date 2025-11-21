@@ -3,7 +3,6 @@ package com.unimag.bustransport.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unimag.bustransport.api.dto.SeatHoldDtos.*;
 import com.unimag.bustransport.config.TestSecurityConfig;
-import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.security.jwt.JwtService;
 import com.unimag.bustransport.security.user.CustomUserDetailsService;
 import com.unimag.bustransport.services.SeatHoldService;

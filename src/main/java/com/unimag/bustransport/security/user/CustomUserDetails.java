@@ -14,13 +14,13 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-     private final Long userId;           // ID de la base de datos
-    private final String email;          // Email del usuario
-    private final String name;       // Nombre completo
+     private final Long userId;
+    private final String email;
+    private final String name;
 
-    private final String password;       // Password hasheado (BCrypt)
-    private final String role;           // Rol: ROLE_PASSENGER, ROLE_ADMIN, etc
-    private final boolean isActive;      // Si el usuario está activo
+    private final String password; // Password hasheado (BCrypt)
+    private final String role;
+    private final boolean isActive;
 
      public static CustomUserDetails fromUser(User user) {
         return new CustomUserDetails(

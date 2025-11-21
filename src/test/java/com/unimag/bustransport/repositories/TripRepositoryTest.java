@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -51,7 +50,6 @@ class TripRepositoryTest extends AbstractRepositoryTI {
     @Autowired
     private EntityManager entityManager;
 
-    // Datos de prueba reutilizables
     private Route route1;
     private Route route2;
     private Bus bus1;
@@ -375,7 +373,7 @@ class TripRepositoryTest extends AbstractRepositoryTI {
                 .type(Seat.Type.STANDARD)
                 .bus(bus)
                 .build();
-        return seatRepository.save(seat); // No guardamos aquí, se guarda con el bus
+        return seatRepository.save(seat);
     }
 
     private Passenger createPassenger(String fullName, String phone, String documentType, String documentNumber, LocalDate birthDate) {
