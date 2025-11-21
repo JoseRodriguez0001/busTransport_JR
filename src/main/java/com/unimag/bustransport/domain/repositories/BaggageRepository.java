@@ -7,4 +7,5 @@ import java.util.List;
 
 public interface BaggageRepository extends JpaRepository<Baggage, Long> {
     List<Baggage> findByTicketId(Long ticketId);
+    int countByTicketId(Long ticketId);
 }

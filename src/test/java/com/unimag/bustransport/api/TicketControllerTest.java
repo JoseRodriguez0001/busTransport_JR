@@ -4,11 +4,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unimag.bustransport.api.dto.TicketDtos.*;
 import com.unimag.bustransport.config.TestSecurityConfig;
 import com.unimag.bustransport.exception.NotFoundException;
+import com.unimag.bustransport.security.jwt.JwtService;
+import com.unimag.bustransport.security.user.CustomUserDetailsService;
 import com.unimag.bustransport.services.TicketService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,6 +32,16 @@ class TicketControllerTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
     @MockitoBean TicketService service;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private AuthenticationManager authenticationManager;
+
+    @MockitoBean
+    private CustomUserDetailsService userDetailsService;
+
 
     @Test
     void get_shouldReturn200() throws Exception {

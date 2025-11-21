@@ -11,12 +11,14 @@ import com.unimag.bustransport.services.RouteService;
 import com.unimag.bustransport.services.mapper.RouteMapper;
 import com.unimag.bustransport.services.mapper.StopMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -33,14 +35,14 @@ public class RouteServiceImpl implements RouteService {
 
         Route route = routeMapper.toEntity(request);
         routeRepository.save(route);
-
+        log.info("Route created with ID {} and code {}", route.getId(), route.getCode());
         return routeMapper.toResponse(route);
     }
 
     @Override
     public void updateRoute(Long id, RouteDtos.RouteUpdateRequest request) {
         Route route = routeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Ruta no encontrada"));
+                .orElseThrow(() -> new NotFoundException(String.format("Route with ID %d not found", id)));
 
         if (request.name() != null) {
             route.setName(request.name());
@@ -63,14 +65,16 @@ public class RouteServiceImpl implements RouteService {
         }
 
         routeRepository.save(route);
+        log.info("Route with ID {} updated", id);
     }
 
     @Override
     public void deleteRoute(Long id) {
         Route route = routeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Ruta no encontrada"));
+                .orElseThrow(() -> new NotFoundException(String.format("Route with ID %d not found", id)));
 
         routeRepository.delete(route);
+        log.info("Route with ID {} deleted", id);
     }
 
     @Override
@@ -81,7 +85,7 @@ public class RouteServiceImpl implements RouteService {
     @Override
     public RouteDtos.RouteResponse getRouteById(Long id) {
         Route route = routeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Ruta no encontrada"));
+                .orElseThrow(() -> new NotFoundException(String.format("Route with ID %d not found", id)));
 
         return routeMapper.toResponse(route);
     }
@@ -92,7 +96,7 @@ public class RouteServiceImpl implements RouteService {
 
         if (stops.isEmpty()) {
             if (!routeRepository.existsById(id)) {
-                throw new NotFoundException("Ruta no encontrada");
+                throw new NotFoundException(String.format("Route with ID %d not found", id));
             }
         }
 
@@ -110,7 +114,7 @@ public class RouteServiceImpl implements RouteService {
         } else if (destination != null) {
             routes = routeRepository.findByDestination(destination);
         } else {
-            throw new NotFoundException("No hay rutas disponibles");
+            throw new NotFoundException("No routes available");
         }
 
         return routes.stream().map(routeMapper::toResponse)
@@ -119,7 +123,7 @@ public class RouteServiceImpl implements RouteService {
 
     private void validateUniqueCode(String code) {
         if (routeRepository.existsByCode(code)) {
-            throw new IllegalStateException("Ya existe una ruta con el código: " + code);
+            throw new IllegalStateException("Route with code already exists: " + code);
         }
     }
 }

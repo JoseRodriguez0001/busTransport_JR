@@ -138,7 +138,7 @@ class SeatHoldServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatHoldService.createSeatHold(request))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Viaje no encontrado");
+                .hasMessageContaining("not found");
 
         verify(tripRepository, times(1)).findById(1L);
         verify(seatHoldRepository, never()).save(any(SeatHold.class));
@@ -160,7 +160,7 @@ class SeatHoldServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatHoldService.createSeatHold(request))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("El asiento A1 ya está reservado");
+                .hasMessageContaining("is already on hold");
 
         verify(seatHoldRepository, never()).save(any(SeatHold.class));
     }
@@ -193,7 +193,7 @@ class SeatHoldServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatHoldService.releaseSeatHold(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Reserva de asiento no encontrada");
+                .hasMessageContaining("not found");
 
         verify(seatHoldRepository, never()).save(any(SeatHold.class));
     }
@@ -408,7 +408,7 @@ class SeatHoldServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatHoldService.validateActiveHolds(1L, seatNumbers, 1L))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("No se encontraron reservas activas");
+                .hasMessageContaining("No active holds found");
     }
 
     @Test
@@ -427,7 +427,7 @@ class SeatHoldServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatHoldService.validateActiveHolds(1L, seatNumbers, 999L))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("no pertenece al usuario");
+                .hasMessageContaining("does not belong to the user");
     }
 
     @Test
@@ -437,7 +437,7 @@ class SeatHoldServiceImplTest {
         User user = givenUser();
         Trip trip = givenTrip();
         SeatHold hold = givenSeatHold(user, trip, SeatHold.Status.HOLD);
-        hold.setExpiresAt(OffsetDateTime.now().minusMinutes(5)); // Expirado
+        hold.setExpiresAt(OffsetDateTime.now().minusMinutes(5));
 
         List<String> seatNumbers = List.of("A1");
 
@@ -447,7 +447,7 @@ class SeatHoldServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> seatHoldService.validateActiveHolds(1L, seatNumbers, 1L))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("ha expirado");
+                .hasMessageContaining("has expired");
     }
 
     @Test

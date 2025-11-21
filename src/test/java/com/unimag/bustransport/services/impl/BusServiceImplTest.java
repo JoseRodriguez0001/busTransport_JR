@@ -27,7 +27,6 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-
 @ExtendWith(MockitoExtension.class)
 class BusServiceImplTest {
 
@@ -174,7 +173,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.createBus(request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("capacity must be multiplo de 4");
+                .hasMessageContaining("Capacity must be a multiple of");
 
         verify(busRepository, never()).save(any(Bus.class));
     }
@@ -208,7 +207,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.updateBus(999L, request))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Bus not found");
+                .hasMessageContaining("Bus with ID 999 not found");
 
         verify(busRepository, times(1)).findById(999L);
         verify(busRepository, never()).save(any(Bus.class));
@@ -230,7 +229,7 @@ class BusServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> busService.updateBus(1L, request))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("capacity must be multiplo de 4");
+                .hasMessageContaining("Capacity must be a multiple of");
 
         verify(busRepository, never()).save(any(Bus.class));
     }
@@ -261,7 +260,7 @@ class BusServiceImplTest {
         // When y Then
         assertThatThrownBy(() -> busService.deleteBus(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Bus not found");
+                .hasMessageContaining("Bus with ID 999 not found");
 
         verify(busRepository, times(1)).findById(999L);
         verify(busRepository, never()).save(any(Bus.class));

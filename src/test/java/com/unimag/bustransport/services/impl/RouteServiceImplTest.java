@@ -117,7 +117,7 @@ class RouteServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> routeService.createRoute(request))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Ya existe una ruta con el código: R001");
+                .hasMessageContaining("Route with code already exists");
 
         verify(routeRepository, times(1)).existsByCode("R001");
         verify(routeRepository, never()).save(any(Route.class));
@@ -152,7 +152,7 @@ class RouteServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> routeService.updateRoute(999L, request))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Ruta no encontrada");
+                .hasMessageContaining("not found");
 
         verify(routeRepository, times(1)).findById(999L);
         verify(routeRepository, never()).save(any(Route.class));
@@ -222,7 +222,7 @@ class RouteServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> routeService.getRouteById(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Ruta no encontrada");
+                .hasMessageContaining("not found");
 
         verify(routeRepository, times(1)).findById(999L);
     }
@@ -258,7 +258,7 @@ class RouteServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> routeService.getStopsByRouteId(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Ruta no encontrada");
+                .hasMessageContaining("not found");
 
         verify(stopRepository, times(1)).findByRouteIdOrderByOrderAsc(999L);
         verify(routeRepository, times(1)).existsById(999L);
@@ -341,7 +341,7 @@ class RouteServiceImplTest {
         // When & Then
         assertThatThrownBy(() -> routeService.searchRoutes(null, null))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("No hay rutas disponibles");
+                .hasMessageContaining("No routes available");
 
         verify(routeRepository, never()).findByOriginAndDestination(any(), any());
         verify(routeRepository, never()).findByOrigin(any());
