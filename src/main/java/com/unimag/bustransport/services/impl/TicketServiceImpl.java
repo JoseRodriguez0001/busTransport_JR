@@ -13,7 +13,6 @@ import com.unimag.bustransport.services.TicketService;
 import com.unimag.bustransport.services.mapper.TicketMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.coyote.BadRequestException;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,7 +44,6 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public TicketDtos.TicketResponse createTicket(TicketDtos.TicketCreateRequest request) {
 
-        // 1. Validar existencia de entidades relacionadas
         Trip trip = tripRepository.findById(request.tripId())
                 .orElseThrow(() -> {
                     log.error("Trip not found with ID: {}", request.tripId());
@@ -86,7 +84,6 @@ public class TicketServiceImpl implements TicketService {
                     );
                 });
 
-        // 2. Validar que las paradas pertenezcan a la ruta del trip
         if (!fromStop.getRoute().getId().equals(trip.getRoute().getId())) {
             log.error("The origin stop does not belong to the trip route");
             throw new IllegalArgumentException(
@@ -101,7 +98,6 @@ public class TicketServiceImpl implements TicketService {
             );
         }
 
-        // 3. Validar que fromStop.order < toStop.order
         if (fromStop.getOrder() >= toStop.getOrder()) {
             log.error("The order of the origin stop ({}) must be less than the destination ({})",
                     fromStop.getOrder(), toStop.getOrder());
@@ -110,7 +106,6 @@ public class TicketServiceImpl implements TicketService {
             );
         }
 
-        // 4. Verificar disponibilidad del asiento en el tramo (solo SOLD)
         List<Ticket> overlappingTickets = ticketRepository.findOverlappingTickets(
                 request.tripId(),
                 request.seatNumber(),
@@ -128,18 +123,14 @@ public class TicketServiceImpl implements TicketService {
         }
 
 
-
-        // 5. Crear entidad y establecer relaciones
         Ticket ticket = ticketMapper.toEntity(request);
         ticket.setTrip(trip);
         ticket.setPassenger(passenger);
         ticket.setFromStop(fromStop);
         ticket.setToStop(toStop);
         ticket.setPurchase(purchase);
-        ticket.setStatus(Ticket.Status.PENDING);  // Crear en PENDING
-        // 6. NO generar QR todavía (se genera al confirmar purchase)
+        ticket.setStatus(Ticket.Status.PENDING);
 
-        // 7. Guardar ticket
         Ticket savedTicket = ticketRepository.save(ticket);
         log.info("Ticket created successfully with ID: {} in PENDING status",
                 savedTicket.getId());
@@ -158,7 +149,6 @@ public class TicketServiceImpl implements TicketService {
                     );
                 });
 
-        // Cambiar status a CANCELLED
         ticket.setStatus(Ticket.Status.CANCELLED);
         ticketRepository.save(ticket);
 
@@ -170,11 +160,9 @@ public class TicketServiceImpl implements TicketService {
     public TicketDtos.TicketResponse getTicket(Long id) {
 
         Ticket ticket = ticketRepository.findById(id)
-                .orElseThrow(() -> {
-                    return new NotFoundException(
-                            String.format("Ticket con ID %d no encontrado", id)
-                    );
-                });
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Ticket con ID %d no encontrado", id)
+                ));
 
         return ticketMapper.toResponse(ticket);
     }
@@ -222,13 +210,10 @@ public class TicketServiceImpl implements TicketService {
     public void generateQrForTicket(Long ticketId) {
 
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(() -> {
-                    return new NotFoundException(
-                            String.format("Ticket con ID %d no encontrado", ticketId)
-                    );
-                });
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Ticket con ID %d no encontrado", ticketId)
+                ));
 
-        // Generar nuevo QR
         String newQrCode = generateUniqueQrCode();
         ticket.setQrCode(newQrCode);
         ticketRepository.save(ticket);
@@ -241,13 +226,10 @@ public class TicketServiceImpl implements TicketService {
     public void validateQrForTicket(String qrCode) {
 
         Ticket ticket = ticketRepository.findByQrCode(qrCode)
-                .orElseThrow(() -> {
-                    return new NotFoundException(
-                            String.format("Ticket con QR '%s' no encontrado", qrCode)
-                    );
-                });
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Ticket con QR '%s' no encontrado", qrCode)
+                ));
 
-        // Validar que el status sea SOLD
         if (ticket.getStatus() != Ticket.Status.SOLD) {
             throw new InvalidCredentialsException(
                     String.format("El ticket no está activo (status: %s)", ticket.getStatus())
@@ -291,7 +273,7 @@ public class TicketServiceImpl implements TicketService {
     public void refundTicket(Long ticketId, Long userId) {
 
         Ticket ticket = ticketRepository.findById(ticketId)
-                .orElseThrow(()-> {return new NotFoundException(String.format("Ticket with ID %d not found", ticketId));});
+                .orElseThrow(()-> new NotFoundException(String.format("Ticket with ID %d not found", ticketId)));
 
         if (!ticket.getPurchase().getUser().getId().equals(userId)) {
             throw new InvalidCredentialsException("You can´t refund this Ticket");
@@ -310,7 +292,7 @@ public class TicketServiceImpl implements TicketService {
                 .between(OffsetDateTime.now(), trip.getDepartureAt())
                 .toMinutes();
 
-        BigDecimal refundPercent = BigDecimal.ZERO;
+        BigDecimal refundPercent;
         if (minutesDiff >= 24 * 60) {
             refundPercent = configService.getValueAsBigDecimal("refund.>24");
         } else if (minutesDiff >= 2 * 60) {
@@ -339,7 +321,6 @@ public class TicketServiceImpl implements TicketService {
 
 
 
-    // Limpiar tickets PENDING antiguos
     @Override
     @Scheduled(cron = "0 */5 * * * *")  // Cada 5 minutos
     public int expireOldTickets() {

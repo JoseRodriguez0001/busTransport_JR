@@ -7,7 +7,6 @@ import com.unimag.bustransport.exception.DuplicateResourceException;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.SeatHoldService;
 import com.unimag.bustransport.services.SeatService;
-import com.unimag.bustransport.services.TicketService;
 import com.unimag.bustransport.services.mapper.SeatMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -38,10 +37,9 @@ public class SeatServiceImpl implements SeatService {
     public SeatDtos.SeatResponse createSeat(SeatDtos.SeatCreateRequest request) {
         Bus bus = busRepository.findById(request.busId())
                 .orElseThrow(()-> new NotFoundException("Bus not found"));
-        // Validar formato del número de asiento
+
         validateSeatNumber(request.number());
 
-        //valida duplicados
         repository.findByBusIdAndNumber(request.busId(), request.number()).
                 ifPresent(existingSeat -> {
                     throw new DuplicateResourceException("Seat already exists");
@@ -64,14 +62,11 @@ public class SeatServiceImpl implements SeatService {
                 .orElseThrow(()-> new NotFoundException("Seat not found"));
 
 
-        // Si se está cambiando el número, validar
         if (request.number() != null && !request.number().equals(seat.getNumber())) {
-            // Validar formato
             validateSeatNumber(request.number());
 
-            // Verificar que no haya tickets vendidos con el número actual
             boolean hasTickets = ticketRepository.existsByTripIdAndSeatNumberAndStatus(
-                    seat.getBus().getId(), // Necesitamos buscar en cualquier trip del bus
+                    seat.getBus().getId(),
                     seat.getNumber(),
                     Ticket.Status.SOLD
             );
@@ -83,7 +78,6 @@ public class SeatServiceImpl implements SeatService {
                 );
             }
 
-            // Validar que no exista duplicado con el nuevo número
             repository.findByBusIdAndNumber(seat.getBus().getId(), request.number())
                     .ifPresent(existingSeat -> {
                         throw new DuplicateResourceException(
@@ -162,13 +156,11 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public boolean isSeatAvailable(Long tripId, String seatNumber, Long fromStopId, Long toStopId) {
 
-        // Validar que el trip existe y obtener su bus
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Trip with ID %d not found", tripId)
                 ));
 
-        // Validar que los stops existen y obtener sus orders
         Stop fromStop = stopRepository.findById(fromStopId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Stop with ID %d not found", fromStopId)
@@ -179,18 +171,15 @@ public class SeatServiceImpl implements SeatService {
                         String.format("Stop with ID %d not found", toStopId)
                 ));
 
-        // Validar que los stops pertenecen a la ruta del trip
         if (!fromStop.getRoute().getId().equals(trip.getRoute().getId()) ||
                 !toStop.getRoute().getId().equals(trip.getRoute().getId())) {
             throw new IllegalArgumentException("Stops do not belong to the trip's route");
         }
 
-        // Validar orden lógico
         if (fromStop.getOrder() >= toStop.getOrder()) {
             throw new IllegalArgumentException("fromStop order must be less than toStop order");
         }
 
-        // Verificar que el asiento existe en el bus del trip
         boolean seatExists = repository.findByBusIdAndNumber(trip.getBus().getId(), seatNumber)
                 .isPresent();
 
@@ -199,7 +188,6 @@ public class SeatServiceImpl implements SeatService {
             return false;
         }
 
-        // Verificar si hay tickets vendidos que se solapen con el tramo
         List<Ticket> overlappingTickets = ticketRepository.findOverlappingTickets(
                 tripId,
                 seatNumber,
@@ -213,7 +201,6 @@ public class SeatServiceImpl implements SeatService {
             return false;
         }
 
-        // Verificar si hay holds activos que se solapen
         boolean hasHold = seatHoldService.hasOverlappingHold(
                 tripId,
                 seatNumber,
@@ -232,13 +219,11 @@ public class SeatServiceImpl implements SeatService {
     @Override
     public void confirmSeatReservation(Long tripId, List<String> seatNumbers, Long purchaseId) {
 
-        // Validar que el trip existe
         Trip trip = tripRepository.findById(tripId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Trip with ID %d not found", tripId)
                 ));
 
-        // Validar que la compra existe y está confirmada
         Purchase purchase = purchaseRepository.findById(purchaseId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Purchase with ID %d not found", purchaseId)
@@ -251,7 +236,6 @@ public class SeatServiceImpl implements SeatService {
             );
         }
 
-        // Validar que todos los asientos existen en el bus del trip
         for (String seatNumber : seatNumbers) {
             boolean seatExists = repository.findByBusIdAndNumber(
                     trip.getBus().getId(), seatNumber
@@ -265,10 +249,8 @@ public class SeatServiceImpl implements SeatService {
             }
         }
 
-        // Validar que los SeatHolds existen, están activos y pertenecen al usuario de la compra
         seatHoldService.validateActiveHolds(tripId, seatNumbers, purchase.getUser().getId());
 
-        // Verificar que los asientos no estén ya vendidos (doble verificación)
         for (String seatNumber : seatNumbers) {
             boolean alreadySold = ticketRepository.existsByTripIdAndSeatNumberAndStatus(
                     tripId, seatNumber, Ticket.Status.SOLD
@@ -280,8 +262,6 @@ public class SeatServiceImpl implements SeatService {
                 );
             }
         }
-        // Los tickets deberían crearse en el PurchaseService o mediante el TicketService
-        // Aquí solo confirmamos que los holds se marcaron correctamente
     }
 
     private void validateSeatNumber(String number) {
@@ -307,6 +287,5 @@ public class SeatServiceImpl implements SeatService {
                 occupied
         );
     }
-
 
 }

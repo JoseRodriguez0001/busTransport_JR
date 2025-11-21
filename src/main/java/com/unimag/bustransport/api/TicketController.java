@@ -22,7 +22,6 @@ public class TicketController {
 
     //UN TICKET SOLO SE CREA AL CREAR UN PURCHASE, NO EXPONEMOS UN CONTROLADOR PARA CREAR UN TICKET POR APARTE
 
-
     @GetMapping("/{id}")
     public ResponseEntity<TicketResponse> get(@PathVariable Long id) {
         return ResponseEntity.ok(service.getTicket(id));

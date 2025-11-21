@@ -41,12 +41,10 @@ public class BaggageServiceImpl implements BaggageService {
             );
         }
 
-        // Validación 1: Peso positivo
         if (request.weightKg() <= 0) {
             throw new IllegalArgumentException("Baggage weight must be greater than 0");
         }
 
-        // Validación 2: Peso máximo por maleta
         BigDecimal maxWeightPerBag = configService.getValueAsBigDecimal("BAGGAGE_MAX_WEIGHT_KG");
         if (BigDecimal.valueOf(request.weightKg()).compareTo(maxWeightPerBag) > 0) {
             throw new IllegalArgumentException(
@@ -54,7 +52,6 @@ public class BaggageServiceImpl implements BaggageService {
             );
         }
 
-        // Validación 3: Límite de equipajes por ticket
         int currentBaggageCount = baggageRepository.countByTicketId(ticket.getId());
         int maxBaggagePerTicket = configService.getValueAsInt("MAX_BAGGAGE_PER_TICKET");
         if (currentBaggageCount >= maxBaggagePerTicket) {
@@ -82,12 +79,10 @@ public class BaggageServiceImpl implements BaggageService {
                 .orElseThrow(() -> new NotFoundException(String.format("Baggage with ID %d not found", id)));
 
         if (request.weightKg() != null) {
-            // Validación 1: Peso positivo
             if (request.weightKg() <= 0) {
                 throw new IllegalArgumentException("Baggage weight must be greater than 0");
             }
 
-            // Validación 2: Peso máximo por maleta
             BigDecimal maxWeightPerBag = configService.getValueAsBigDecimal("BAGGAGE_MAX_WEIGHT_KG");
             if (BigDecimal.valueOf(request.weightKg()).compareTo(maxWeightPerBag) > 0) {
                 throw new IllegalArgumentException(

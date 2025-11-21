@@ -33,7 +33,6 @@ public class NotificationFactory {
                 ));
 
     }
-    
 
      //Obtiene el servicio de notificación apropiado según el tipo
     public NotificationService getService(NotificationType type) {

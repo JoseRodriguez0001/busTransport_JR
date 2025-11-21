@@ -17,7 +17,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -131,7 +130,6 @@ public class SeatHoldServiceImpl implements SeatHoldService {
     }
 
     @Scheduled(cron = "0 */1 * * * *")
-    @Transactional
     @Override
     public int markExpiredHolds() {
         log.debug("Marking expired seat holds");
@@ -151,7 +149,6 @@ public class SeatHoldServiceImpl implements SeatHoldService {
     }
 
     @Scheduled(cron = "0 */5 * * * *")
-    @Transactional
     @Override
     public int deleteExpiredHolds() {
         log.debug("Deleting EXPIRED seat holds");
