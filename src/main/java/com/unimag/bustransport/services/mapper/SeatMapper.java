@@ -4,7 +4,6 @@ import com.unimag.bustransport.api.dto.SeatDtos;
 import com.unimag.bustransport.domain.entities.Seat;
 import org.mapstruct.*;
 
-
 @Mapper(componentModel = "spring")
 public interface SeatMapper {
 
@@ -18,5 +17,6 @@ public interface SeatMapper {
     @Mapping(target = "occupied", ignore = true)
     SeatDtos.SeatResponse toResponse(Seat seat);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(SeatDtos.SeatUpdateRequest request, @MappingTarget Seat seat);
 }

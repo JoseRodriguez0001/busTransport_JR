@@ -4,10 +4,6 @@ import com.unimag.bustransport.api.dto.RouteDtos;
 import com.unimag.bustransport.domain.entities.Route;
 import org.mapstruct.*;
 
-/**
- * Mapper for Route entity to DTO and vice versa.
- * Handles conversions between Route entity and DTOs with nested Stop and FareRule mappings.
- */
 @Mapper(componentModel = "spring", uses = {StopMapper.class, FareRuleMapper.class})
 public interface RouteMapper {
 

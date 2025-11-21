@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
-
 @Entity
-@Table(name = "stops")
+@Table(name = "stops",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_stop_route_order",
+                columnNames = {"route_id", "order"}
+        ))
 @Getter
 @Setter
 @AllArgsConstructor
@@ -17,6 +20,7 @@ public class Stop {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    @Column(name = "\"order\"")
     private Integer order;
     private Double lat;
     private Double lng;

@@ -15,5 +15,6 @@ public interface StopMapper {
 
     StopDtos.StopResponse toResponse(Stop stop);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(StopDtos.StopUpdateRequest request, @MappingTarget Stop stop);
 }

@@ -2,12 +2,12 @@ package com.unimag.bustransport.api.dto;
 
 import com.unimag.bustransport.domain.entities.Trip;
 import jakarta.validation.constraints.NotNull;
-
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
 public class TripDtos {
+
     public record TripCreateRequest(
             @NotNull Long routeId,
             @NotNull Long busId,
@@ -16,12 +16,14 @@ public class TripDtos {
             @NotNull OffsetDateTime arrivalAt,
             Double overbookingPercent
     ) implements Serializable {}
+
     public record TripUpdateRequest(
             OffsetDateTime departureAt,
             OffsetDateTime arrivalAt,
             Double overbookingPercent,
             Trip.Status status
     ) implements Serializable {}
+
     public record TripResponse(
             Long id,
 
@@ -41,6 +43,6 @@ public class TripDtos {
         public record BusSummary(Long id, String plate, Integer capacity) implements Serializable {}
     }
 
-
+    public record StatisticsResponse(Long soldSeats) implements Serializable {}
 
 }
