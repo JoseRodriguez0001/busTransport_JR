@@ -1,8 +1,6 @@
 package com.unimag.bustransport.security.config;
 
 import com.unimag.bustransport.security.jwt.JwtAuthenticationFilter;
-import com.unimag.bustransport.security.jwt.JwtService;
-import com.unimag.bustransport.security.user.CustomUserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
