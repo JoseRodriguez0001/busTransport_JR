@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
-import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +25,7 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
 
     List<Trip> findByStatus(Trip.Status status);
     List<Trip> findByBusIdAndStatus(Long busId, Trip.Status status);
+
     // viajes que estan proximos a salir.
     @Query( "SELECT t " +
             "FROM Trip t " +
@@ -33,6 +33,7 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             "      AND t.status = com.unimag.bustransport.domain.entities.Trip.Status.SCHEDULED " +
             "      AND t.departureAt <= :threshold")
             List<Trip> findTripsNearDeparture(@Param("date") LocalDate date, @Param("threshold") OffsetDateTime threshold);
+
     //encontrar viaje que con bus y sus asientos para ver su disponibilidad
     @Query( "SELECT t " +
             "FROM Trip t " +
@@ -40,9 +41,13 @@ public interface TripRepository extends JpaRepository<Trip,Long> {
             "LEFT JOIN FETCH b.seats " +
             "WHERE t.id = :tripId")
             Optional<Trip> findByIdWithBusAndSeats(@Param("tripId") Long tripId);
+
     @Query("SELECT COUNT(ti)" +
             "FROM Ticket ti " +
-            "WHERE ti.trip.id = :tripId AND ti.status = com.unimag.bustransport.domain.entities.Ticket.Status.SOLD")
+            "WHERE ti.trip.id = :tripId       AND ti.status IN (\n" +
+            "            com.unimag.bustransport.domain.entities.Ticket.Status.SOLD,\n" +
+            "            com.unimag.bustransport.domain.entities.Ticket.Status.BOARDED\n" +
+            "      )")
     Long countSoldTickets(Long tripId);
 
 }

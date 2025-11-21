@@ -2,7 +2,6 @@ package com.unimag.bustransport.services;
 
 import com.unimag.bustransport.api.dto.RouteDtos;
 import com.unimag.bustransport.api.dto.StopDtos;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 

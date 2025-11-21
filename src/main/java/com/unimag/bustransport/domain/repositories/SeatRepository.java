@@ -2,7 +2,6 @@ package com.unimag.bustransport.domain.repositories;
 
 import com.unimag.bustransport.domain.entities.Seat;
 import org.springframework.data.jpa.repository.JpaRepository;
-
 import java.util.List;
 import java.util.Optional;
 

@@ -4,10 +4,8 @@ import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Pattern;
-
 import java.io.Serializable;
 import java.time.LocalDate;
-import java.time.OffsetDateTime;
 
 public class PassengerDtos {
     public record PassengerCreateRequest(

@@ -2,7 +2,6 @@ package com.unimag.bustransport.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 
@@ -18,7 +17,6 @@ public class ParcelDtos {
             Long tripId
     ) implements Serializable {}
 
-    //por si se equivocan ingresando los datos en la terminal
     public record ParcelUpdateRequest(
             String senderName,
             String senderPhone,

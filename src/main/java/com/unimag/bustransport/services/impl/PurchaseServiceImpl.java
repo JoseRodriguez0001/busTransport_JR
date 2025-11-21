@@ -39,13 +39,11 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public PurchaseDtos.PurchaseResponse createPurchase(PurchaseDtos.PurchaseCreateRequest request) {
 
-        // 1. Validar usuario
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new NotFoundException(
                         String.format("User with ID %d not found", request.userId())
                 ));
 
-        // 2. Validar que todos los tickets pertenezcan al mismo trip
         validateAllTicketsSameTrip(request.tickets());
 
         Long tripId = request.tickets().get(0).tripId();
@@ -58,14 +56,12 @@ public class PurchaseServiceImpl implements PurchaseService {
             throw new IllegalStateException("Cannot create purchase for trip with ID " + tripId);
         }
 
-        // 3. Validar que los SeatHolds estén activos
         List<String> seatNumbers = request.tickets().stream()
                 .map(PurchaseDtos.PurchaseCreateRequest.TicketRequest::seatNumber)
                 .collect(Collectors.toList());
 
         seatHoldService.validateActiveHolds(tripId, seatNumbers, user.getId());
 
-        // 4. Crear Purchase en PENDING
         Purchase purchase = Purchase.builder()
                 .user(user)
                 .totalAmount(BigDecimal.ZERO)
@@ -76,12 +72,10 @@ public class PurchaseServiceImpl implements PurchaseService {
 
         purchaseRepository.save(purchase);
 
-        // 5. Crear Tickets en estado PENDING y calcular total
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         for (PurchaseDtos.PurchaseCreateRequest.TicketRequest ticketReq : request.tickets()) {
 
-            // Calcular precio del ticket
             BigDecimal ticketPrice = fareRuleService.calculatePrice(
                     trip.getRoute().getId(),
                     ticketReq.fromStopId(),
@@ -94,7 +88,6 @@ public class PurchaseServiceImpl implements PurchaseService {
 
             totalAmount = totalAmount.add(ticketPrice);
 
-            // Crear ticket en PENDING (sin QR todavía)
             TicketDtos.TicketCreateRequest ticketCreateReq = new TicketDtos.TicketCreateRequest(
                     ticketReq.seatNumber(),
                     ticketPrice,
@@ -111,7 +104,6 @@ public class PurchaseServiceImpl implements PurchaseService {
                     ticketReq.seatNumber(), ticketPrice);
         }
 
-        // 6. Actualizar total de la purchase (solo tickets, sin baggage)
         purchase.setTotalAmount(totalAmount);
         purchaseRepository.save(purchase);
 
@@ -150,13 +142,11 @@ public class PurchaseServiceImpl implements PurchaseService {
     @Override
     public void confirmPurchase(Long purchaseId, String paymentReference) {
 
-        // 1. Obtener purchase
         Purchase purchase = purchaseRepository.findById(purchaseId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Purchase with ID %d not found", purchaseId)
                 ));
 
-        // 2. Validar estado
         if (purchase.getPaymentStatus() != Purchase.PaymentStatus.PENDING) {
             throw new IllegalStateException(
                     String.format("Cannot confirm purchase with ID %d. Current status: %s",
@@ -164,14 +154,12 @@ public class PurchaseServiceImpl implements PurchaseService {
             );
         }
 
-        // 3. Validar que los SeatHolds TODAVÍA estén activos
         List<String> seatNumbers = purchase.getTickets().stream()
                 .map(Ticket::getSeatNumber)
                 .collect(Collectors.toList());
 
         Long tripId = purchase.getTickets().get(0).getTrip().getId();
 
-        //todo averiguar por que aqui se usa try catch
         try {
             seatHoldService.validateActiveHolds(tripId, seatNumbers, purchase.getUser().getId());
         } catch (Exception e) {
@@ -181,16 +169,13 @@ public class PurchaseServiceImpl implements PurchaseService {
             );
         }
 
-        // 4. Actualizar Purchase a CONFIRMED
         purchase.setPaymentStatus(Purchase.PaymentStatus.CONFIRMED);
         purchase.setPaymentReference(paymentReference);
 
-// 5. Cambiar Tickets de PENDING a SOLD y generar QR usando TicketService
         purchase.getTickets().forEach(ticket -> {
             ticket.setStatus(Ticket.Status.SOLD);
             ticketService.generateQrForTicket(ticket.getId());
 
-            // Marcar SeatHold como EXPIRED
             seatHoldRepository.findByTripIdAndSeatNumberAndUserId(
                     ticket.getTrip().getId(),
                     ticket.getSeatNumber(),
@@ -211,7 +196,6 @@ public class PurchaseServiceImpl implements PurchaseService {
                     NotificationType.WHATSAPP
             );
         } catch (Exception e) {
-            // No fallar la compra si falla la notificación
             log.error("Failed to send purchase confirmation notification: {}", e.getMessage());
         }
 
@@ -238,9 +222,7 @@ public class PurchaseServiceImpl implements PurchaseService {
             );
         }
 
-        // Marcar SeatHolds como EXPIRED y cancelar tickets
         purchase.getTickets().forEach(ticket -> {
-            // Marcar SeatHold como EXPIRED
             seatHoldRepository.findByTripIdAndSeatNumberAndUserId(
                     ticket.getTrip().getId(),
                     ticket.getSeatNumber(),
@@ -250,11 +232,9 @@ public class PurchaseServiceImpl implements PurchaseService {
                 seatHoldRepository.save(hold);
             });
 
-            // Cancelar ticket
             ticket.setStatus(Ticket.Status.CANCELLED);
         });
 
-        // Actualizar purchase
         purchase.setPaymentStatus(Purchase.PaymentStatus.CANCELLED);
         purchaseRepository.save(purchase);
 

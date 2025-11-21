@@ -44,7 +44,6 @@ public class ParcelServiceImpl implements ParcelService {
 
         log.debug("Generated parcel code: {}", code);
 
-        // Validar que las paradas existan
         Stop fromStop = stopRepository.findById(request.fromStopId())
                 .orElseThrow(() -> {
                     log.error("From stop not found with ID: {}", request.fromStopId());
@@ -61,7 +60,6 @@ public class ParcelServiceImpl implements ParcelService {
                     );
                 });
 
-        // Validar que las paradas pertenezcan a la misma ruta
         if (!fromStop.getRoute().getId().equals(toStop.getRoute().getId())) {
             log.error("Stops do not belong to the same route");
             throw new IllegalArgumentException(
@@ -69,7 +67,6 @@ public class ParcelServiceImpl implements ParcelService {
             );
         }
 
-        // Validar el orden de las paradas
         if (fromStop.getOrder() >= toStop.getOrder()) {
             log.error("Invalid stop order: from={}, to={}", fromStop.getOrder(), toStop.getOrder());
             throw new IllegalArgumentException(
@@ -83,7 +80,6 @@ public class ParcelServiceImpl implements ParcelService {
         parcel.setToStop(toStop);
         parcel.setStatus(Parcel.Status.CREATED);
 
-        // Si se proporciona un trip, validarlo y asignarlo
         if (request.tripId() != null) {
             Trip trip = tripRepository.findById(request.tripId())
                     .orElseThrow(() -> {
@@ -93,7 +89,6 @@ public class ParcelServiceImpl implements ParcelService {
                         );
                     });
 
-            // Validar que el trip pertenezca a la misma ruta
             if (!trip.getRoute().getId().equals(fromStop.getRoute().getId())) {
                 log.error("Trip does not belong to the same route as the stops");
                 throw new IllegalArgumentException(
@@ -101,7 +96,6 @@ public class ParcelServiceImpl implements ParcelService {
                 );
             }
 
-            // Validar que el trip esté en estado apropiado
             if (trip.getStatus() == Trip.Status.ARRIVED || trip.getStatus() == Trip.Status.CANCELLED) {
                 log.error("Cannot assign parcel to trip with status: {}", trip.getStatus());
                 throw new IllegalStateException(
@@ -114,7 +108,6 @@ public class ParcelServiceImpl implements ParcelService {
             log.info("Parcel assigned to trip {} and marked as IN_TRANSIT", trip.getId());
         }
 
-        // Generar OTP de entrega (6 dígitos)
         String otp = generateOtp();
         parcel.setDeliveryOtp(otp);
 
@@ -145,7 +138,6 @@ public class ParcelServiceImpl implements ParcelService {
             );
         }
 
-        // Actualizar datos de personas
         if (request.senderName() != null) {
             parcel.setSenderName(request.senderName());
             log.debug("Updated sender name to: {}", request.senderName());
@@ -166,13 +158,11 @@ public class ParcelServiceImpl implements ParcelService {
             log.debug("Updated receiver phone to: {}", request.receiverPhone());
         }
 
-        // Actualizar precio
         if (request.price() != null) {
             parcel.setPrice(request.price());
             log.debug("Updated price to: {}", request.price());
         }
 
-        // Actualizar paradas (con validaciones)
         if (request.fromStopId() != null || request.toStopId() != null) {
             Long newFromStopId = request.fromStopId() != null ? request.fromStopId() : parcel.getFromStop().getId();
             Long newToStopId = request.toStopId() != null ? request.toStopId() : parcel.getToStop().getId();
@@ -187,14 +177,12 @@ public class ParcelServiceImpl implements ParcelService {
                             String.format("Stop with ID %d not found", newToStopId)
                     ));
 
-            // Validar que pertenezcan a la misma ruta
             if (!newFromStop.getRoute().getId().equals(newToStop.getRoute().getId())) {
                 throw new IllegalArgumentException(
                         "Origin and destination stops must belong to the same route"
                 );
             }
 
-            // Validar orden
             if (newFromStop.getOrder() >= newToStop.getOrder()) {
                 throw new IllegalArgumentException(
                         "Origin stop order must be less than destination stop order"

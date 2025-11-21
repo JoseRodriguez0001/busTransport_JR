@@ -18,22 +18,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@RequiredArgsConstructor        //Genera un constructor con todos los campos que sean "final" en esta clase
+@RequiredArgsConstructor
 @Transactional
 public class BaggageServiceImpl implements BaggageService {
 
-    //dependencias que quiero que spring inyecte aqui
     private final BaggageRepository baggageRepository;
     private final TicketRepository ticketRepository;
     private final BaggageMapper baggageMapper;
-    private final ConfigService configService; //revisar por que se llama a la interfaz y no a la implementacion
+    private final ConfigService configService;
 
     @Override
     public BaggageDtos.BaggageResponse registerBaggage(BaggageDtos.BaggageCreateRequest request) {
         Ticket ticket = ticketRepository.findById(request.ticketId())
                 .orElseThrow(() -> new NotFoundException("Ticket no encontrado"));
 
-        // VALIDAR que el ticket esté SOLD
         if (ticket.getStatus() != Ticket.Status.SOLD) {
             throw new IllegalStateException(
                     String.format("Cannot register baggage for ticket with status %s. Only SOLD tickets allowed.",

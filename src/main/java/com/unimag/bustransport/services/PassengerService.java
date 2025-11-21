@@ -1,7 +1,6 @@
 package com.unimag.bustransport.services;
 
 import com.unimag.bustransport.api.dto.PassengerDtos;
-import com.unimag.bustransport.domain.entities.Passenger;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;

@@ -1,7 +1,6 @@
 package com.unimag.bustransport.api.dto;
 
 import jakarta.validation.constraints.NotBlank;
-
 import java.io.Serializable;
 
 public class ConfigDtos {

@@ -2,7 +2,6 @@ package com.unimag.bustransport.domain.repositories;
 
 import com.unimag.bustransport.domain.entities.Ticket;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -13,12 +12,14 @@ import java.util.Optional;
 public interface TicketRepository extends JpaRepository<Ticket,Long> {
     List<Ticket> findByTripId(Long tripId);
     List<Ticket> findByPassengerId(Long passengerId);
-    // Buscar tickets por compra
     List<Ticket> findByPurchaseId(Long purchaseId);
     Optional<Ticket> findByQrCode(String qrCode);
     List<Ticket> findByStatus(Ticket.Status status);
 
-    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.trip.id = :tripId AND t.status = com.unimag.bustransport.domain.entities.Ticket.Status.SOLD")
+    @Query("SELECT COUNT(t) FROM Ticket t WHERE t.trip.id = :tripId AND t.status IN (\n" +
+            "            com.unimag.bustransport.domain.entities.Ticket.Status.SOLD,\n" +
+            "            com.unimag.bustransport.domain.entities.Ticket.Status.BOARDED\n" +
+            "      )")
     long countSoldByTrip(@Param("tripId") Long tripId);
     @Query("""
     SELECT COUNT(t)
@@ -38,15 +39,11 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
             @Param("seatNumber") String seatNumber
     );
 
-    // Verificar si un asiento ya está vendido en un trip
     boolean existsByTripIdAndSeatNumberAndStatus(
             Long tripId,
             String seatNumber,
             Ticket.Status status
     );
-
-    // Buscar tickets por trip y números de asiento
-    List<Ticket> findByTripIdAndSeatNumberIn(Long tripId, List<String> seatNumbers);
 
     // Buscar tickets vendidos para un tramo específico (verificar solapamiento)
     @Query("SELECT t FROM Ticket t " +

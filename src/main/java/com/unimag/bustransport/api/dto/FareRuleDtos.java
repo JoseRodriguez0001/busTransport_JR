@@ -2,7 +2,6 @@ package com.unimag.bustransport.api.dto;
 
 import com.unimag.bustransport.domain.entities.FareRule;
 import jakarta.validation.constraints.*;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.Map;

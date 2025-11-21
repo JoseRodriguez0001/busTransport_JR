@@ -1,11 +1,9 @@
 package com.unimag.bustransport.api.dto;
 
-import com.unimag.bustransport.domain.entities.Purchase;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;

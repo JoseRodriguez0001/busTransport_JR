@@ -10,7 +10,6 @@ import java.util.List;
 
 public class UserDtos {
 
-    //  Para registro público
     public record UserCreateRequest(
             @NotBlank @Email String email,
             @NotBlank String password,
@@ -18,15 +17,13 @@ public class UserDtos {
             String phone
     ) implements Serializable {}
 
-    // Para crear empleados (solo los crea un admin)
     public record EmployeeCreateRequest(
             @NotBlank @Email String email,
             @NotBlank String name,
             String phone,
-            @NotNull Role role  // ROLE_ADMIN, ROLE_CLERK, ROLE_DRIVER, ROLE_DISPATCHER
+            @NotNull Role role
     ) implements Serializable {}
 
-    //  Para actualizar usuario (SIN rol, email, status, password)
     public record UserUpdateRequest(
             String name,
             String phone

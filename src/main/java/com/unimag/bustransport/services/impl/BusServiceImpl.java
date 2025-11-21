@@ -36,7 +36,6 @@ public class BusServiceImpl implements BusService {
     private static final char[] COLUMN_LETTERS = {'A','B','C','D'};
     @Override
     public BusDtos.BusResponse createBus(BusDtos.BusCreateRequest request) {
-        // Validar que la placa sea única
         repository.findByPlate(request.plate()).ifPresent(existingBus -> {
             log.warn("IAttempt to create a bus with a duplicate license plate: {}", request.plate());
             throw new DuplicateResourceException(
@@ -52,7 +51,6 @@ public class BusServiceImpl implements BusService {
         }
         Bus bus = mapper.toEntity(request);
 
-        // Guardar bus
         Bus savedBus = repository.save(bus);
         log.info("Bus created succesfully with  ID: {} and plate: {}", savedBus.getId(), savedBus.getPlate());
 
@@ -117,7 +115,6 @@ public class BusServiceImpl implements BusService {
         if (hasActiveTrip) {
             throw new IllegalArgumentException("Cannot delete bus: it is currently assigned to an active trip");
         }
-        //cambiamos estado
         bus.setStatus(Bus.Status.RETIRED);
         repository.save(bus);
     }

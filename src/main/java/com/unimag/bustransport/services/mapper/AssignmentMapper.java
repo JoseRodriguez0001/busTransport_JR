@@ -7,8 +7,6 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring")
 public interface AssignmentMapper {
 
-    //quiere decir "no intentes llenar ese atributo de la entidad"
-    //target -> objeto destino / source -> objeto fuente u objeto origen
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "trip.id", source = "tripId")
     @Mapping(target = "driver.id", source = "driverId")
@@ -26,8 +24,6 @@ public interface AssignmentMapper {
     @Mapping(source = "dispatcher.name", target = "dispatcher.name")
     AssignmentDtos.AssignmentResponse toResponse(Assignment assignment);
 
-    //“Si en el objeto de origen (source) hay un campo con valor null,
-    //no lo copies al objeto destino (target). Déjalo tal como estaba.”
     @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     void updateEntityFromRequest(AssignmentDtos.AssignmentUpdateRequest request, @MappingTarget Assignment assignment);
 }
