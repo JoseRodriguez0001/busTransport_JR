@@ -4,7 +4,6 @@ import com.unimag.bustransport.api.dto.UserDtos;
 import com.unimag.bustransport.domain.entities.Role;
 import com.unimag.bustransport.domain.entities.User;
 import com.unimag.bustransport.domain.repositories.UserRepository;
-import com.unimag.bustransport.exception.InvalidCredentialsException;
 import com.unimag.bustransport.services.mapper.UserMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -82,30 +81,7 @@ class UserServiceImplTest {
         );
     }
 
-  /*  @Test
-    @DisplayName("Debe registrar un pasajero correctamente")
-    void shouldRegisterPassenger(){
-        //given
-        UserDtos.UserCreateRequest request = givenRegisterRequest();
-        User userSaved = givenUserWithPhone(1L, "test@example.com", "3005540394", Role.ROLE_PASSENGER, User.Status.ACTIVE);
 
-        when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
-        when(userRepository.findByPhone("3005540394")).thenReturn(Optional.empty());
-        when(userRepository.save(any(User.class))).thenReturn(userSaved);
-
-        //when
-        UserDtos.UserResponse response = userService.registerUser(request);
-
-        //Then
-        assertThat(response).isNotNull();
-        assertThat(response.id()).isEqualTo(1L);
-        assertThat(response.email()).isEqualTo("test@example.com");
-        assertThat(response.role()).isEqualTo(Role.ROLE_PASSENGER);
-
-        verify(userRepository, times(1)).existsByEmail("test@example.com");
-        verify(userRepository, times(1)).save(any(User.class));
-    }*/
-/*
     @Test
     @DisplayName("Debe crear un empleado con rol DRIVER")
     void shouldRegisterEmployee(){
@@ -125,7 +101,7 @@ class UserServiceImplTest {
         assertThat(response.role()).isEqualTo(Role.ROLE_DRIVER);
 
         verify(userRepository, times(1)).save(any(User.class));
-    }*/
+    }
 
     @Test
     @DisplayName("Debe lanzar excepción al crear empleado con rol PASSENGER")
@@ -180,13 +156,10 @@ class UserServiceImplTest {
         userService.changePassword(1L, "password123", "NewPassword123");
 
         // Then
-        // 1. Se encripta la nueva contraseña
         verify(passwordEncoder).encode("NewPassword123");
 
-        // 2. El usuario fue guardado con la nueva contraseña encriptada
         assertThat("encodedNewPassword").isEqualTo(user.getPasswordHash());
 
-        // 3. Se guarda el usuario
         verify(userRepository, times(1)).save(user);
     }
 

@@ -8,7 +8,6 @@ import com.unimag.bustransport.domain.repositories.TicketRepository;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.ConfigService;
 import com.unimag.bustransport.services.mapper.BaggageMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

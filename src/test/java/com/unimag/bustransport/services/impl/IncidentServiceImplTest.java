@@ -5,7 +5,6 @@ import com.unimag.bustransport.domain.entities.Incident;
 import com.unimag.bustransport.domain.repositories.IncidentRepository;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.mapper.IncidentMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -8,7 +8,6 @@ import com.unimag.bustransport.domain.repositories.StopRepository;
 import com.unimag.bustransport.domain.repositories.TripRepository;
 import com.unimag.bustransport.services.IncidentService;
 import com.unimag.bustransport.services.mapper.ParcelMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +29,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ParcelService Unit Tests")
 class ParcelServiceImplTest {
 
     @Mock
@@ -470,7 +468,7 @@ class ParcelServiceImplTest {
         Stop fromStop = givenStop(1L, "Stop 1", 1, route);
         Stop toStop = givenStop(2L, "Stop 2", 2, route);
         Parcel parcel = givenParcel(fromStop, toStop, Parcel.Status.IN_TRANSIT);
-        parcel.setDeliveryOtp("123456"); // OTP correcto
+        parcel.setDeliveryOtp("123456");
 
         when(parcelRepository.findById(1L)).thenReturn(Optional.of(parcel));
         when(parcelRepository.save(any(Parcel.class))).thenReturn(parcel);

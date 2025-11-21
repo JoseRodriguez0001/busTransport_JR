@@ -5,7 +5,6 @@ import com.unimag.bustransport.domain.entities.Config;
 import com.unimag.bustransport.domain.repositories.ConfigRepository;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.mapper.ConfigMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,7 +82,7 @@ class ConfigServiceImplTest {
 
         when(configRepository.existsByKey("MAX_SEATS")).thenReturn(true);
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.createConfig(request))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessageContaining("Configuration with key already exists: MAX_SEATS");
@@ -119,7 +118,7 @@ class ConfigServiceImplTest {
 
         when(configRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.updateConfig(999L, request))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Config with ID 999 not found");
@@ -152,7 +151,7 @@ class ConfigServiceImplTest {
         // Given
         when(configRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.deleteConfig(999L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Config with ID 999 not found");
@@ -209,7 +208,7 @@ class ConfigServiceImplTest {
         // Given
         when(configRepository.findByKey("NON_EXISTENT")).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.getConfigByKey("NON_EXISTENT"))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Config with key 'NON_EXISTENT' not found");
@@ -243,7 +242,7 @@ class ConfigServiceImplTest {
 
         when(configRepository.findByKey("INVALID_NUMBER")).thenReturn(Optional.of(config));
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.getValueAsBigDecimal("INVALID_NUMBER"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Value of 'INVALID_NUMBER' is not a valid number");
@@ -277,7 +276,7 @@ class ConfigServiceImplTest {
 
         when(configRepository.findByKey("INVALID_INT")).thenReturn(Optional.of(config));
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.getValueAsInt("INVALID_INT"))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Value of 'INVALID_INT' is not a valid integer");
@@ -309,7 +308,7 @@ class ConfigServiceImplTest {
         // Given
         when(configRepository.findByKey("MISSING_KEY")).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.getValueAsString("MISSING_KEY"))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Config with key 'MISSING_KEY' not found");

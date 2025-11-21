@@ -8,10 +8,8 @@ import com.unimag.bustransport.domain.repositories.BusRepository;
 import com.unimag.bustransport.domain.repositories.SeatRepository;
 import com.unimag.bustransport.exception.DuplicateResourceException;
 import com.unimag.bustransport.exception.NotFoundException;
-import com.unimag.bustransport.services.impl.BusServiceImpl;
 import com.unimag.bustransport.services.mapper.BusMapper;
 import com.unimag.bustransport.services.mapper.SeatMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -170,7 +168,7 @@ class BusServiceImplTest {
 
         when(busRepository.findByPlate("ABC123")).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> busService.createBus(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Capacity must be a multiple of");
@@ -204,7 +202,7 @@ class BusServiceImplTest {
 
         when(busRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> busService.updateBus(999L, request))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Bus with ID 999 not found");
@@ -226,7 +224,7 @@ class BusServiceImplTest {
 
         when(busRepository.findById(1L)).thenReturn(Optional.of(existingBus));
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> busService.updateBus(1L, request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Capacity must be a multiple of");
@@ -291,7 +289,7 @@ class BusServiceImplTest {
         // Given
         when(busRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> busService.getBus(999L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("Bus with ID 999 not found");

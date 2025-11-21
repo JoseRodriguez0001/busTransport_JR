@@ -5,7 +5,6 @@ import com.unimag.bustransport.domain.entities.*;
 import com.unimag.bustransport.domain.repositories.*;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.mapper.FareRuleMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -135,9 +134,9 @@ class FareRuleServiceImplTest {
         discounts.put("child", 0.5);
 
         return new FareRuleDtos.FareRuleCreateRequest(
-                1L,  // routeId
-                1L,  // fromStopId
-                2L,  // toStopId
+                1L,
+                1L,
+                2L,
                 BigDecimal.valueOf(50000),
                 discounts,
                 FareRule.DynamicPricing.ON
@@ -390,7 +389,6 @@ class FareRuleServiceImplTest {
         BigDecimal price = fareRuleService.calculatePrice(1L, 1L, 2L, 1L, 1L, "A1", 1L);
 
         // Then
-        // 50000 * (1 - 0.5) = 25000
         assertThat(price).isEqualByComparingTo(BigDecimal.valueOf(25000));
     }
 
@@ -403,8 +401,8 @@ class FareRuleServiceImplTest {
         Stop toStop = givenStop(2L, "Stop 2", 2, route);
         FareRule fareRule = givenFareRule(route, fromStop, toStop);
 
-        Passenger student = givenPassenger(20); // Estudiante 20%
-        Seat seat = givenSeat(Seat.Type.PREFERENTIAL); // +15%
+        Passenger student = givenPassenger(20);
+        Seat seat = givenSeat(Seat.Type.PREFERENTIAL);
         Bus bus = givenBus(40);
         Trip trip = Trip.builder().id(1L).bus(bus).date(LocalDate.now().plusDays(12))
                 .route(route).status(Trip.Status.SCHEDULED).departureAt(OffsetDateTime.now().plusDays(1)).arrivalAt(OffsetDateTime.now().plusDays(1).plusHours(3))
@@ -416,17 +414,12 @@ class FareRuleServiceImplTest {
         when(seatRepository.findByBusIdAndNumber(1L, "A1")).thenReturn(Optional.of(seat));
         when(busRepository.findById(1L)).thenReturn(Optional.of(bus));
         when(tripRepository.findById(1L)).thenReturn(Optional.of(trip));
-        when(ticketRepository.countSoldByTrip(1L)).thenReturn(35L); // +20% dinámico
+        when(ticketRepository.countSoldByTrip(1L)).thenReturn(35L);
 
         // When
         BigDecimal price = fareRuleService.calculatePrice(1L, 1L, 2L, 1L, 1L, "A1", 1L);
 
-        // Then
-        // Base: 50000
-        // Descuento estudiante: 50000 * (1 - 0.2) = 40000
-        // Recargo asiento: 50000 * 0.15 = 7500
-        // Recargo dinámico: 50000 * 0.20 = 10000
-        // Total: 40000 + 7500 + 10000 = 57500
+
         assertThat(price).isEqualByComparingTo(BigDecimal.valueOf(57500));
     }
 

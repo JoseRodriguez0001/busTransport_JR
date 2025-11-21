@@ -9,7 +9,6 @@ import com.unimag.bustransport.domain.repositories.StopRepository;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.mapper.RouteMapper;
 import com.unimag.bustransport.services.mapper.StopMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

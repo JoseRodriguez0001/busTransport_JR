@@ -12,7 +12,6 @@ import com.unimag.bustransport.exception.DuplicateResourceException;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.TripService;
 import com.unimag.bustransport.services.mapper.AssignmentMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -115,10 +114,10 @@ class AssignmentServiceImplTest {
 
     private AssignmentDtos.AssignmentCreateRequest givenCreateRequest() {
         return new AssignmentDtos.AssignmentCreateRequest(
-                1L,   // tripId
-                1L,   // driverId
-                2L,   // dispatcherId
-                false // checklistOk
+                1L,
+                1L,
+                2L,
+                false
         );
     }
 

@@ -6,7 +6,6 @@ import com.unimag.bustransport.domain.entities.Stop;
 import com.unimag.bustransport.domain.repositories.RouteRepository;
 import com.unimag.bustransport.domain.repositories.StopRepository;
 import com.unimag.bustransport.exception.DuplicateResourceException;
-import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.mapper.StopMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
