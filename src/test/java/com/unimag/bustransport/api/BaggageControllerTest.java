@@ -6,7 +6,6 @@ import com.unimag.bustransport.config.TestSecurityConfig;
 import com.unimag.bustransport.security.jwt.JwtService;
 import com.unimag.bustransport.security.user.CustomUserDetailsService;
 import com.unimag.bustransport.services.BaggageService;
-import com.unimag.bustransport.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;

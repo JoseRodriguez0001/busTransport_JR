@@ -104,11 +104,6 @@ Todas las pruebas usan Testcontainers para garantizar un PostgreSQL real durante
 
 ---
 
-## 📦 Estructura del Proyecto
-<img width="439" height="206" alt="image" src="https://github.com/user-attachments/assets/6eca4e9b-afa7-4f5c-815a-f58f9d790e97" />
-
----
-
 ## 👥 Autores
 - **Jose Rodriguez**  +  **Robert Gonzalez** 
 

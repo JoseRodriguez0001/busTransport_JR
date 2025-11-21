@@ -2,8 +2,6 @@ package com.unimag.bustransport.config;
 
 import com.unimag.bustransport.security.config.JwtProperties;
 import com.unimag.bustransport.security.jwt.JwtAuthenticationFilter;
-import com.unimag.bustransport.security.jwt.JwtService;
-import com.unimag.bustransport.security.user.CustomUserDetailsService;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -13,7 +11,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.testcontainers.shaded.com.trilead.ssh2.auth.AuthenticationManager;
 
 
 @TestConfiguration

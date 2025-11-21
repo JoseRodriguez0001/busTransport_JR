@@ -49,14 +49,6 @@ public class UserRepositoryTest extends AbstractRepositoryTI {
         return userRepository.save(user);
     }
 
-    private User givenActiveDriver() {
-        return givenUser("driver@test.com", "Driver Test", Role.ROLE_DRIVER, User.Status.ACTIVE);
-    }
-
-    private User givenActivePassenger() {
-        return givenUser("passenger@test.com", "Passenger Test", Role.ROLE_PASSENGER, User.Status.ACTIVE);
-    }
-
     @Test
     @DisplayName("Debe encontrar usuario por email")
     void shouldFindUserByEmail() {
