@@ -357,7 +357,7 @@ class TicketServiceImplTest {
         purchase.setTotalAmount(BigDecimal.valueOf(100000));
 
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticketToRefund));
-        when(configService.getValueAsBigDecimal("refund.>24")).thenReturn(BigDecimal.valueOf(0.9)); // 90%
+        when(configService.getValueAsBigDecimal("refund.>24")).thenReturn(BigDecimal.valueOf(0.9));
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(purchase);
         when(ticketRepository.save(any(Ticket.class))).thenReturn(ticketToRefund);
 
@@ -384,7 +384,7 @@ class TicketServiceImplTest {
         purchase.setTotalAmount(BigDecimal.valueOf(100000));
 
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticketToRefund));
-        when(configService.getValueAsBigDecimal("refund.2to24")).thenReturn(BigDecimal.valueOf(0.5)); // 50%
+        when(configService.getValueAsBigDecimal("refund.2to24")).thenReturn(BigDecimal.valueOf(0.5));
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(purchase);
         when(ticketRepository.save(any(Ticket.class))).thenReturn(ticketToRefund);
 
@@ -410,7 +410,7 @@ class TicketServiceImplTest {
         purchase.setTotalAmount(BigDecimal.valueOf(100000));
 
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticketToRefund));
-        when(configService.getValueAsBigDecimal("refund.<2")).thenReturn(BigDecimal.valueOf(0.0)); // 0%
+        when(configService.getValueAsBigDecimal("refund.<2")).thenReturn(BigDecimal.valueOf(0.0));
         when(purchaseRepository.save(any(Purchase.class))).thenReturn(purchase);
         when(ticketRepository.save(any(Ticket.class))).thenReturn(ticketToRefund);
 
@@ -432,7 +432,7 @@ class TicketServiceImplTest {
         when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticketToRefund));
 
         // When & Then
-        assertThatThrownBy(() -> ticketService.refundTicket(1L, 999L)) // userId diferente
+        assertThatThrownBy(() -> ticketService.refundTicket(1L, 999L))
                 .isInstanceOf(InvalidCredentialsException.class)
                 .hasMessageContaining("You can´t refund this Ticket");
 
@@ -445,7 +445,7 @@ class TicketServiceImplTest {
     void processNoshows_ShouldMarkTicketsAsNoShow() {
         // Given
         Trip departingTrip = createTrip(1L, bus, route);
-        departingTrip.setDepartureAt(OffsetDateTime.now().plusMinutes(3)); // Sale en 3 minutos
+        departingTrip.setDepartureAt(OffsetDateTime.now().plusMinutes(3));
 
         Ticket ticket1 = createTicket(1L, "1A", departingTrip, passenger, fromStop, toStop, purchase);
         Ticket ticket2 = createTicket(2L, "1B", departingTrip, passenger, fromStop, toStop, purchase);

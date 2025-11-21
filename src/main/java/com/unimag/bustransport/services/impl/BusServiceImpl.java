@@ -34,27 +34,26 @@ public class BusServiceImpl implements BusService {
 
     private static final int COLUMS = 4;
     private static final char[] COLUMN_LETTERS = {'A','B','C','D'};
+
     @Override
     public BusDtos.BusResponse createBus(BusDtos.BusCreateRequest request) {
-        // Validar que la placa sea única
         repository.findByPlate(request.plate()).ifPresent(existingBus -> {
-            log.warn("IAttempt to create a bus with a duplicate license plate: {}", request.plate());
+            log.warn("Attempt to create a bus with a duplicate license plate: {}", request.plate());
             throw new DuplicateResourceException(
                     String.format("Bus already exists with plate '%s'", request.plate()));
 
         });
 
         if (request.capacity() % COLUMS != 0) {
-            log.warn("capacity {} no es multiplo de {}",request.capacity(),COLUMS);
+            log.warn("Capacity {} is not a multiple of {}", request.capacity(), COLUMS);
             throw new IllegalArgumentException(
-                    String.format("capacity must be multiplo de %d", COLUMS)
+                    String.format("Capacity must be a multiple of %d", COLUMS)
             );
         }
         Bus bus = mapper.toEntity(request);
 
-        // Guardar bus
         Bus savedBus = repository.save(bus);
-        log.info("Bus created succesfully with  ID: {} and plate: {}", savedBus.getId(), savedBus.getPlate());
+        log.info("Bus created successfully with ID: {} and plate: {}", savedBus.getId(), savedBus.getPlate());
 
         createSeatsForBus(savedBus);
         return mapper.toResponse(savedBus);
@@ -63,12 +62,12 @@ public class BusServiceImpl implements BusService {
     private void createSeatsForBus(Bus bus) {
         int rows = bus.getCapacity()/COLUMS;
 
-        List<Seat> seats =  new ArrayList<>();
-        for (int row=1;row<=rows;row++) {
-            for (int col=0;col<COLUMS;col++) {
-                String seatNumber= row + String.valueOf(COLUMN_LETTERS[col]);
+        List<Seat> seats = new ArrayList<>();
+        for (int row=1; row<=rows; row++) {
+            for (int col=0; col<COLUMS; col++) {
+                String seatNumber = row + String.valueOf(COLUMN_LETTERS[col]);
 
-                Seat.Type seatType = (row==1)? Seat.Type.PREFERENTIAL : Seat.Type.STANDARD;
+                Seat.Type seatType = (row==1) ? Seat.Type.PREFERENTIAL : Seat.Type.STANDARD;
 
                 Seat seat = Seat.builder()
                         .number(seatNumber)
@@ -81,45 +80,45 @@ public class BusServiceImpl implements BusService {
         }
 
         seatRepository.saveAll(seats);
-        log.info("Seats created succesfully");
+        log.info("Seats created successfully for bus with ID: {}", bus.getId());
     }
 
     @Override
     public void updateBus(Long id, BusDtos.BusUpdateRequest request) {
         Bus bus = repository.findById(id).orElseThrow(
-                ()-> new NotFoundException("Bus not found")
+                () -> new NotFoundException(String.format("Bus with ID %d not found", id))
         );
 
         if (request.capacity() % COLUMS != 0) {
-            log.warn("capacity {} no es multiplo de {}",request.capacity(),COLUMS);
+            log.warn("Capacity {} is not a multiple of {}", request.capacity(), COLUMS);
             throw new IllegalArgumentException(
-                    String.format("capacity must be multiplo de %d", COLUMS)
+                    String.format("Capacity must be a multiple of %d", COLUMS)
             );
         }
 
-        mapper.updateEntityFromRequest(request,bus);
+        mapper.updateEntityFromRequest(request, bus);
         repository.save(bus);
+        log.info("Bus with ID {} updated", id);
     }
 
     @Override
     public void deleteBus(Long id) {
         Bus bus = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Bus not found"));
+                .orElseThrow(() -> new NotFoundException(String.format("Bus with ID %d not found", id)));
 
         boolean hasActiveTrip = bus.getTrips().stream()
                 .anyMatch(trip ->
-                                trip.getStatus() == Trip.Status.SCHEDULED ||
+                        trip.getStatus() == Trip.Status.SCHEDULED ||
                                 trip.getStatus() == Trip.Status.BOARDING ||
                                 trip.getStatus() == Trip.Status.DEPARTED
-
                 );
 
         if (hasActiveTrip) {
             throw new IllegalArgumentException("Cannot delete bus: it is currently assigned to an active trip");
         }
-        //cambiamos estado
         bus.setStatus(Bus.Status.RETIRED);
         repository.save(bus);
+        log.info("Bus with ID {} marked as retired", id);
     }
 
     @Override

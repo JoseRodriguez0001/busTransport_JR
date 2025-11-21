@@ -5,12 +5,15 @@ import com.unimag.bustransport.api.dto.RouteDtos.*;
 import com.unimag.bustransport.api.dto.StopDtos.*;
 import com.unimag.bustransport.config.TestSecurityConfig;
 import com.unimag.bustransport.exception.NotFoundException;
+import com.unimag.bustransport.security.jwt.JwtService;
+import com.unimag.bustransport.security.user.CustomUserDetailsService;
 import com.unimag.bustransport.services.RouteService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -30,6 +33,16 @@ class RouteControllerTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
     @MockitoBean RouteService service;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private AuthenticationManager authenticationManager;
+
+    @MockitoBean
+    private CustomUserDetailsService userDetailsService;
+
 
     @Test
     void create_shouldReturn201AndLocation() throws Exception {

@@ -14,13 +14,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Slf4j@Service@Transactional@RequiredArgsConstructor
+@Slf4j
+@Service
+@Transactional
+@RequiredArgsConstructor
 public class StopServiceImpl implements StopService {
+
     private final StopRepository repository;
     private final RouteRepository  routeRepository;
     private final StopMapper mapper;
+
     @Override
     public StopDtos.StopResponse createStop(StopDtos.StopCreateRequest request) {
         Route route = routeRepository.findById(request.routeId()).
@@ -44,14 +48,14 @@ public class StopServiceImpl implements StopService {
         Stop stop = repository.findById(id).orElseThrow(() -> new RuntimeException("Stop not found"));
 
         if (request.order() != null && !request.order().equals(stop.getOrder())){
-            //validamos que no sea menor que 0
+
             if (request.order()<0) throw new IllegalArgumentException("Order cannot be less than 0");
-            //validamos que no exista ese order ya
+
             repository.findByRouteIdAndOrder(stop.getRoute().getId(), request.order()).ifPresent(stop1 ->{
                 throw new DuplicateResourceException(String.format("Stop with id %d already exists", stop1.getId()));
             } );
         }
-        //mapeamos para actualizar y guardamos si pasa todas las validaciones
+
         mapper.updateEntityFromRequest(request, stop);
         repository.save(stop);
         log.info("Updated stop with id {}", stop.getId());

@@ -182,4 +182,43 @@ public class BaggageRepositoryTest extends AbstractRepositoryTI {
         // Then
         assertThat(found).isEmpty();
     }
+    @Test
+    @DisplayName("Debe contar equipajes por ticket ID")
+    void shouldCountBaggageByTicketId() {
+        // Given
+        Ticket ticket = givenTicket();
+        Baggage baggage1 = Baggage.builder()
+                .ticket(ticket)
+                .weightKg(25.0)
+                .fee(BigDecimal.valueOf(15000))
+                .tagCode("TAG-001")
+                .build();
+        Baggage baggage2 = Baggage.builder()
+                .ticket(ticket)
+                .weightKg(15.0)
+                .fee(BigDecimal.valueOf(0))
+                .tagCode("TAG-002")
+                .build();
+        baggageRepository.save(baggage1);
+        baggageRepository.save(baggage2);
+
+        // When
+        int count = baggageRepository.countByTicketId(ticket.getId());
+
+        // Then
+        assertThat(count).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("Debe retornar 0 cuando ticket no tiene equipajes")
+    void shouldReturnZeroWhenTicketHasNoBaggage() {
+        // Given
+        Ticket ticket = givenTicket();
+
+        // When
+        int count = baggageRepository.countByTicketId(ticket.getId());
+
+        // Then
+        assertThat(count).isEqualTo(0);
+    }
 }

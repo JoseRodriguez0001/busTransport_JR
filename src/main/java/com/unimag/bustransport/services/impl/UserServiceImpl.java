@@ -30,9 +30,6 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
 
-    // TODO: Inyectar cuando se implemente Spring Security
-    // private final PasswordEncoder passwordEncoder;
-
     @Override
     public UserDtos.UserResponse registerUser(UserDtos.UserCreateRequest request) {
         log.debug("Registering new user with email: {}", request.email());
@@ -61,7 +58,6 @@ public class UserServiceImpl implements UserService {
         user.setName(request.name());
         user.setPhone(request.phone());
 
-        //  Forzar rol PASSENGER en registro público
         user.setRole(Role.ROLE_PASSENGER);
 
         user.setPasswordHash(passwordEncoder.encode(request.password()));
@@ -82,7 +78,6 @@ public class UserServiceImpl implements UserService {
 
         validateEmail(request.email());
 
-        // Validar que el rol NO sea PASSENGER
         if (request.role() == Role.ROLE_PASSENGER) {
             log.error("Cannot create PASSENGER accounts with createEmployee method");
             throw new IllegalArgumentException(
@@ -111,9 +106,8 @@ public class UserServiceImpl implements UserService {
         user.setEmail(request.email());
         user.setName(request.name());
         user.setPhone(request.phone());
-        user.setRole(request.role());  //  Ahora sí acepta el rol (ADMIN, CLERK, DRIVER, DISPATCHER)
+        user.setRole(request.role());
 
-         // Generar contraseña temporal y encriptarla
          String tempPassword = generateTemporaryPassword();
          user.setPasswordHash(passwordEncoder.encode(tempPassword));
 
@@ -129,35 +123,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(savedUser);
     }
 
-    /*@Override
-    @Transactional(readOnly = true)
-    public UserDtos.UserResponse login(String email, String password) {
-        log.debug("Login attempt for email: {}", email);
-
-        User user = userRepository.findByEmail((email)).orElseThrow(() -> {
-                    log.error("User not found with email: {}", email);
-                    return new InvalidCredentialsException("Invalid email or password");
-                });
-
-        if (user.getStatus() != User.Status.ACTIVE) {
-            log.error("User account is not active. Status: {}", user.getStatus());
-            throw new InvalidCredentialsException(
-                    String.format("User account is %s", user.getStatus())
-            );
-        }
-
-        // TODO: Usar passwordEncoder.matches() cuando implementes Spring Security
-        if (!user.getPasswordHash().equals(password)) {
-            log.error("Invalid password for email: {}", email);
-            throw new InvalidCredentialsException("Invalid email or password");
-        }
-
-        log.info("User logged in successfully: {} with role: {}", email, user.getRole());
-
-        // TODO: Retornar JWT token cuando implementes Spring Security
-        return userMapper.toResponse(user);
-    }*/
-
     @Override
     public void updateUser(Long id, UserDtos.UserUpdateRequest request) {
         log.debug("Updating user with ID: {}", id);
@@ -170,7 +135,6 @@ public class UserServiceImpl implements UserService {
                     );
                 });
 
-        // Validar y actualizar teléfono
         if (request.phone() != null && !request.phone().equals(user.getPhone())) {
             validatePhone(request.phone());
             userRepository.findByPhone(request.phone()).ifPresent(existingUser -> {
@@ -181,9 +145,6 @@ public class UserServiceImpl implements UserService {
                 }
             });
         }
-
-        // Solo actualizar campos permitidos
-        // NO actualizar: role, email, status, password
 
         if (request.name() != null) {
             user.setName(request.name());
@@ -212,22 +173,18 @@ public class UserServiceImpl implements UserService {
                     );
                 });
 
-        // Validar contraseña actual con BCrypt
         if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
             log.error("Invalid old password for user ID: {}", id);
             throw new InvalidCredentialsException("Invalid old password");
         }
 
-        // Validar que la nueva sea diferente
         if (oldPassword.equals(newPassword)) {
             log.error("New password is the same as old password for user ID: {}", id);
             throw new IllegalArgumentException("New password must be different from old password");
         }
 
-        // Validar fortaleza de contraseña
         validatePasswordStrength(newPassword);
 
-        // Encriptar nueva contraseña
         user.setPasswordHash(passwordEncoder.encode(newPassword));
         userRepository.save(user);
 
@@ -300,8 +257,6 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-    //  No exponer como endpoint público
-    // Solo para uso interno del servicio o por ADMIN
     @Override
     @Transactional(readOnly = true)
     public UserDtos.UserResponse getUserByEmail(String email) {
@@ -318,8 +273,7 @@ public class UserServiceImpl implements UserService {
         return userMapper.toResponse(user);
     }
 
-    // ⚠️ MÉTODO INTERNO: No exponer como endpoint público
-    // Solo para uso interno del servicio o por ADMIN
+
     @Override
     @Transactional(readOnly = true)
     public UserDtos.UserResponse getUserByPhone(String phone) {

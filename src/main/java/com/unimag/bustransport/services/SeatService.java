@@ -2,9 +2,6 @@ package com.unimag.bustransport.services;
 
 import com.unimag.bustransport.api.dto.SeatDtos;
 import com.unimag.bustransport.domain.entities.Seat;
-import com.unimag.bustransport.domain.entities.SeatHold;
-
-import java.time.LocalDate;
 import java.util.List;
 
 public interface SeatService {
@@ -15,5 +12,5 @@ public interface SeatService {
     List<SeatDtos.SeatResponse> getSeatsByBusIdAndType(Long busId, Seat.Type seatType);
     SeatDtos.SeatResponse getSeatById(Long id);
     boolean isSeatAvailable(Long tripId, String seatNumber, Long fromStopId, Long toStopId);
-    void confirmSeatReservation(Long tripId, List<String> seatNumbers, Long purchaseId); // pendiente verificar en seathold
+    void confirmSeatReservation(Long tripId, List<String> seatNumbers, Long purchaseId);
 }

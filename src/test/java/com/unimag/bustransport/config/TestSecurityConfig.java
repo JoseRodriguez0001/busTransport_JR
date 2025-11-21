@@ -19,14 +19,10 @@ import org.testcontainers.shaded.com.trilead.ssh2.auth.AuthenticationManager;
 @TestConfiguration
 public class TestSecurityConfig {
 
-
     // Mocks de beans de seguridad
-    @MockitoBean private JwtService jwtService;
     @MockitoBean private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @MockitoBean private CustomUserDetailsService customUserDetailsService;
     @MockitoBean private UserDetailsService userDetailsService;
     @MockitoBean private PasswordEncoder passwordEncoder;
-    @MockitoBean private AuthenticationManager authenticationManager;
     @MockitoBean private AuthenticationProvider authenticationProvider;
     @MockitoBean private JwtProperties jwtProperties;
 

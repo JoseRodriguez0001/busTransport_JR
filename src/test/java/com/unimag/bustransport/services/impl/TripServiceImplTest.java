@@ -6,7 +6,6 @@ import com.unimag.bustransport.domain.entities.*;
 import com.unimag.bustransport.domain.repositories.BusRepository;
 import com.unimag.bustransport.domain.repositories.RouteRepository;
 import com.unimag.bustransport.domain.repositories.TripRepository;
-import com.unimag.bustransport.exception.DuplicateResourceException;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.mapper.TripMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,12 +68,12 @@ class TripServiceImplTest {
         trip = createTrip(1L, route, bus, today, departureAt, arrivalAt, Trip.Status.SCHEDULED);
 
         createRequest = new TripDtos.TripCreateRequest(
-                1L, // routeId
-                1L, // busId
+                1L,
+                1L,
                 tomorrow,
                 OffsetDateTime.of(tomorrow.atTime(14, 0), ZoneOffset.UTC),
                 OffsetDateTime.of(tomorrow.atTime(16, 0), ZoneOffset.UTC),
-                5.0 // overbookingPercent
+                5.0
         );
 
         updateRequest = new TripDtos.TripUpdateRequest(
@@ -176,7 +175,7 @@ class TripServiceImplTest {
     void updateTrip_ShouldThrowException_WhenChangingDatesWithSoldTickets() {
         // Given
         when(tripRepository.findById(1L)).thenReturn(Optional.of(trip));
-        when(tripRepository.countSoldTickets(1L)).thenReturn(5L); // Hay tickets vendidos
+        when(tripRepository.countSoldTickets(1L)).thenReturn(5L);
 
         // When & Then
         assertThatThrownBy(() -> tripService.updateTrip(1L, updateRequest))

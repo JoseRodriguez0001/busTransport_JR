@@ -9,8 +9,11 @@ import lombok.*;
                 name = "uk_seat_bus_number",
                 columnNames = {"bus_id", "number"}
         ))
-@Getter@Setter
-@NoArgsConstructor@AllArgsConstructor@Builder
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

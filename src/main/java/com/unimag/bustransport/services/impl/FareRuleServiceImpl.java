@@ -1,6 +1,5 @@
 package com.unimag.bustransport.services.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unimag.bustransport.api.dto.FareRuleDtos;
 import com.unimag.bustransport.domain.entities.*;
 import com.unimag.bustransport.domain.repositories.*;

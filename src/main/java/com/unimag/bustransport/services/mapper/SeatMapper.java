@@ -4,7 +4,6 @@ import com.unimag.bustransport.api.dto.SeatDtos;
 import com.unimag.bustransport.domain.entities.Seat;
 import org.mapstruct.*;
 
-
 @Mapper(componentModel = "spring")
 public interface SeatMapper {
 

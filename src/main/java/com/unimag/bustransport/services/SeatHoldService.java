@@ -22,10 +22,8 @@ public interface SeatHoldService {
 
     boolean isSeatOnHold(Long tripId, String seatNumber);
 
-    //aca los marco como expirados cada x tienpo(por si no alcanza a crear la compra y se la pasa el tiempo)
     int markExpiredHolds();
 
-    //aca borro de la db los que ya expiraron
     int deleteExpiredHolds();
 
     void validateActiveHolds(Long tripId, List<String> seatNumbers, Long userId);

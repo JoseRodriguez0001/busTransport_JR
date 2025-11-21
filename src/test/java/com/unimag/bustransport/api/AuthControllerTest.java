@@ -56,6 +56,7 @@ class AuthControllerTest {
     @MockitoBean
     private CustomUserDetailsService userDetailsService;
 
+    @MockitoBean
     private CustomUserDetails userDetails;
 
     @BeforeEach

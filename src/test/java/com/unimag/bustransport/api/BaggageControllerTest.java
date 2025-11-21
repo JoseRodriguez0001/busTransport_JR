@@ -3,12 +3,16 @@ package com.unimag.bustransport.api;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unimag.bustransport.api.dto.BaggageDtos.*;
 import com.unimag.bustransport.config.TestSecurityConfig;
+import com.unimag.bustransport.security.jwt.JwtService;
+import com.unimag.bustransport.security.user.CustomUserDetailsService;
 import com.unimag.bustransport.services.BaggageService;
+import com.unimag.bustransport.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -29,6 +33,16 @@ class BaggageControllerTest {
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
     @MockitoBean BaggageService service;
+
+    @MockitoBean
+    private JwtService jwtService;
+
+    @MockitoBean
+    private AuthenticationManager authenticationManager;
+
+    @MockitoBean
+    private CustomUserDetailsService userDetailsService;
+
 
     @Test
     void create_shouldReturn201AndLocation() throws Exception {

@@ -1,7 +1,6 @@
 package com.unimag.bustransport.api;
 
 import com.unimag.bustransport.api.dto.UserDtos.EmployeeCreateRequest;
-import com.unimag.bustransport.api.dto.UserDtos.UserCreateRequest;
 import com.unimag.bustransport.api.dto.UserDtos.UserResponse;
 import com.unimag.bustransport.api.dto.UserDtos.UserUpdateRequest;
 import com.unimag.bustransport.domain.entities.Role;

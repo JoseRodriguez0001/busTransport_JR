@@ -28,22 +28,21 @@ public class PassengerServiceImpl implements PassengerService {
 
     @Override
     public PassengerDtos.PassengerResponse createPassenger(PassengerDtos.PassengerCreateRequest request) {
-        Passenger passenger = mapper.toEntity(request);//creando entidad
+        Passenger passenger = mapper.toEntity(request);
         if (request.userId() != null) {
             log.debug("Associating passenger with user ID: {}", request.userId());
             User user = userRepository.findById(request.userId())
-                    .orElseThrow(() -> {return new NotFoundException(String.format("Usuario con ID %d no encontrado", request.userId())
-                        );
-                    });
+                    .orElseThrow(() -> new NotFoundException(String.format("Usuario con ID %d no encontrado", request.userId())
+                        ));
             passenger.setUser(user);
         } else {
             log.debug("Creating a passenger without an associated user (guest purchase)");
         }
 
-        passenger.setCreatedAt(OffsetDateTime.now());//fecha de creacion
-        Passenger savedPassenger = repository.save(passenger);//guardando
+        passenger.setCreatedAt(OffsetDateTime.now());
+        Passenger savedPassenger = repository.save(passenger);
         log.info("Passenger created");
-        return mapper.toResponse(savedPassenger);//retorna informacion del passenger
+        return mapper.toResponse(savedPassenger);
     }
 
     @Override

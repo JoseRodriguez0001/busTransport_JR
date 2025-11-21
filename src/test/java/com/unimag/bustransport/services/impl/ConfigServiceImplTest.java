@@ -5,7 +5,6 @@ import com.unimag.bustransport.domain.entities.Config;
 import com.unimag.bustransport.domain.repositories.ConfigRepository;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.mapper.ConfigMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -83,10 +82,10 @@ class ConfigServiceImplTest {
 
         when(configRepository.existsByKey("MAX_SEATS")).thenReturn(true);
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.createConfig(request))
                 .isInstanceOf(IllegalStateException.class)
-                .hasMessageContaining("Ya existe una configuración con la clave: MAX_SEATS");
+                .hasMessageContaining("Configuration with key already exists: MAX_SEATS");
 
         verify(configRepository, times(1)).existsByKey("MAX_SEATS");
         verify(configRepository, never()).save(any(Config.class));
@@ -119,10 +118,10 @@ class ConfigServiceImplTest {
 
         when(configRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.updateConfig(999L, request))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Configuración no encontrada");
+                .hasMessageContaining("Config with ID 999 not found");
 
         verify(configRepository, times(1)).findById(999L);
         verify(configRepository, never()).save(any(Config.class));
@@ -152,10 +151,10 @@ class ConfigServiceImplTest {
         // Given
         when(configRepository.findById(999L)).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.deleteConfig(999L))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Configuración no encontrada");
+                .hasMessageContaining("Config with ID 999 not found");
 
         verify(configRepository, times(1)).findById(999L);
         verify(configRepository, never()).delete(any(Config.class));
@@ -209,10 +208,10 @@ class ConfigServiceImplTest {
         // Given
         when(configRepository.findByKey("NON_EXISTENT")).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.getConfigByKey("NON_EXISTENT"))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Configuración con clave 'NON_EXISTENT' no encontrada");
+                .hasMessageContaining("Config with key 'NON_EXISTENT' not found");
 
         verify(configRepository, times(1)).findByKey("NON_EXISTENT");
     }
@@ -243,10 +242,10 @@ class ConfigServiceImplTest {
 
         when(configRepository.findByKey("INVALID_NUMBER")).thenReturn(Optional.of(config));
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.getValueAsBigDecimal("INVALID_NUMBER"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("El valor de 'INVALID_NUMBER' no es un número válido");
+                .hasMessageContaining("Value of 'INVALID_NUMBER' is not a valid number");
 
         verify(configRepository, times(1)).findByKey("INVALID_NUMBER");
     }
@@ -277,10 +276,10 @@ class ConfigServiceImplTest {
 
         when(configRepository.findByKey("INVALID_INT")).thenReturn(Optional.of(config));
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.getValueAsInt("INVALID_INT"))
                 .isInstanceOf(RuntimeException.class)
-                .hasMessageContaining("El valor de 'INVALID_INT' no es un número entero válido");
+                .hasMessageContaining("Value of 'INVALID_INT' is not a valid integer");
 
         verify(configRepository, times(1)).findByKey("INVALID_INT");
     }
@@ -309,10 +308,10 @@ class ConfigServiceImplTest {
         // Given
         when(configRepository.findByKey("MISSING_KEY")).thenReturn(Optional.empty());
 
-        // When & Then
+        // When y Then
         assertThatThrownBy(() -> configService.getValueAsString("MISSING_KEY"))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessageContaining("Configuración con clave 'MISSING_KEY' no encontrada");
+                .hasMessageContaining("Config with key 'MISSING_KEY' not found");
 
         verify(configRepository, times(1)).findByKey("MISSING_KEY");
     }

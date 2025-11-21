@@ -137,7 +137,7 @@ class SeatServiceImplTest {
         // Given
         when(busRepository.findById(1L)).thenReturn(Optional.of(bus));
         when(seatRepository.findByBusIdAndNumber(1L, "2A")).thenReturn(Optional.empty());
-        when(seatRepository.countByBusId(1L)).thenReturn(40L); // Ya tiene 40 asientos
+        when(seatRepository.countByBusId(1L)).thenReturn(40L);
 
         // When & Then
         assertThatThrownBy(() -> seatService.createSeat(createRequest))
@@ -391,7 +391,7 @@ class SeatServiceImplTest {
         // Given
         Trip trip = createTrip(1L);
         Stop fromStop = createStop(1L, 2);
-        Stop toStop = createStop(2L, 1); // order inválido
+        Stop toStop = createStop(2L, 1);
 
         when(tripRepository.findById(1L)).thenReturn(Optional.of(trip));
         when(stopRepository.findById(1L)).thenReturn(Optional.of(fromStop));

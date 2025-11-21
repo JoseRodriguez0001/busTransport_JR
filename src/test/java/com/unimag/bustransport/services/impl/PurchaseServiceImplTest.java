@@ -12,7 +12,6 @@ import com.unimag.bustransport.services.FareRuleService;
 import com.unimag.bustransport.services.SeatHoldService;
 import com.unimag.bustransport.services.TicketService;
 import com.unimag.bustransport.services.mapper.PurchaseMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -110,7 +109,6 @@ class PurchaseServiceImplTest {
                 .tickets(new ArrayList<>())
                 .build();
 
-        // Agregar un ticket de ejemplo
         Ticket ticket = Ticket.builder()
                 .id(1L)
                 .seatNumber("A1")
@@ -127,16 +125,16 @@ class PurchaseServiceImplTest {
     private PurchaseDtos.PurchaseCreateRequest givenCreateRequest() {
         PurchaseDtos.PurchaseCreateRequest.TicketRequest ticketRequest =
                 new PurchaseDtos.PurchaseCreateRequest.TicketRequest(
-                        1L,  // tripId
-                        1L,  // passengerId
-                        "A1", // seatNumber
-                        1L,  // fromStopId
-                        2L,  // toStopId
-                        null // baggage
+                        1L,
+                        1L,
+                        "A1",
+                        1L,
+                        2L,
+                        null
                 );
 
         return new PurchaseDtos.PurchaseCreateRequest(
-                1L,  // userId
+                1L,
                 "CARD",
                 List.of(ticketRequest)
         );

@@ -14,10 +14,8 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -78,10 +76,6 @@ class NotificationHelperTest {
                 .contains("150.000,00")
                 .contains("PUR-1");
     }
-
-
-
-
 
     @Test
     @DisplayName("Debe enviar notificación de cancelación de ticket correctamente")

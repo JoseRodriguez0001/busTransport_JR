@@ -6,11 +6,8 @@ import com.unimag.bustransport.domain.entities.Role;
 import com.unimag.bustransport.domain.entities.User;
 import com.unimag.bustransport.domain.repositories.PassengerRepository;
 import com.unimag.bustransport.domain.repositories.UserRepository;
-import com.unimag.bustransport.exception.DuplicateResourceException;
 import com.unimag.bustransport.exception.NotFoundException;
-import com.unimag.bustransport.services.impl.PassengerServiceImpl;
 import com.unimag.bustransport.services.mapper.PassengerMapper;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -196,7 +193,7 @@ class PassengerServiceImplTest {
         // Given
         Passenger existingPassenger = givenPassenger();
         PassengerDtos.PassengerUpdateRequest partialRequest = new PassengerDtos.PassengerUpdateRequest(
-                "Nuevo Nombre",  // solo actualizar nombre
+                "Nuevo Nombre",
                 null,
                 null,
                 null,
