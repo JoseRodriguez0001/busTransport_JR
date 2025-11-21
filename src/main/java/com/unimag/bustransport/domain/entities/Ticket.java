@@ -56,6 +56,6 @@ public class Ticket {
     private Purchase purchase;
 
     public enum Status {
-        PENDING, SOLD, CANCELLED, NO_SHOW
+        PENDING, SOLD, CANCELLED, NO_SHOW,BOARDED
     }
 }

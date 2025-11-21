@@ -5,6 +5,7 @@ import com.unimag.bustransport.api.dto.FareRuleDtos;
 import com.unimag.bustransport.domain.entities.*;
 import com.unimag.bustransport.domain.repositories.*;
 import com.unimag.bustransport.exception.NotFoundException;
+import com.unimag.bustransport.services.ConfigService;
 import com.unimag.bustransport.services.FareRuleService;
 import com.unimag.bustransport.services.mapper.FareRuleMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.time.Period;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +35,8 @@ public class FareRuleServiceImpl implements FareRuleService {
     private final TicketRepository ticketRepository;
     private final BusRepository busRepository;
     private final FareRuleMapper fareRuleMapper;
+    private final TripRepository tripRepository;
+    private final ConfigService configService;
 
     @Override
     public FareRuleDtos.FareRuleResponse createFareRule(FareRuleDtos.FareRuleCreateRequest request) {
@@ -200,11 +205,15 @@ public class FareRuleServiceImpl implements FareRuleService {
         return finalPrice;
     }
 
-    // Calcular recargo dinámico basado en ocupación
+    // Calcular recargo dinámico basado en ocupación o tiempo
     private BigDecimal calculateDynamicSurcharge(Long tripId, Long busId, BigDecimal basePrice) {
         Bus bus = busRepository.findById(busId)
                 .orElseThrow(() -> new NotFoundException(
                         String.format("Bus with ID %d not found", busId)
+                ));
+        Trip trip = tripRepository.findById(tripId)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format("Trip with ID %d not found", tripId)
                 ));
 
         // Contar tickets SOLD para este trip
@@ -227,6 +236,18 @@ public class FareRuleServiceImpl implements FareRuleService {
             log.info("Medium occupancy ({}%) surcharge applied: +10%", (int)(occupancyRate * 100));
         } else {
             log.info("No dynamic surcharge applied (occupancy: {}%)", (int)(occupancyRate * 100));
+        }
+
+        // 3. Recargo por venta a menos de 5 minutos del inicio
+        OffsetDateTime now = OffsetDateTime.now();
+        long minutesToDeparture = Duration.between(now, trip.getDepartureAt()).toMinutes();
+
+        if (minutesToDeparture <= 5 && minutesToDeparture >= 0) {
+            BigDecimal lastMinuteSurcharge = basePrice.multiply(configService.getValueAsBigDecimal("no-show.policy"));
+            surcharge = surcharge.add(lastMinuteSurcharge);
+
+            log.info("Last-minute sale surcharge applied: +15% ({} minutes before departure)",
+                    minutesToDeparture);
         }
 
         return surcharge;

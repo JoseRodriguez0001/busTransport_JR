@@ -53,6 +53,9 @@ class FareRuleServiceImplTest {
     @Mock
     private BusRepository busRepository;
 
+    @Mock
+    private TripRepository tripRepository;
+
     @Spy
     private final FareRuleMapper fareRuleMapper = Mappers.getMapper(FareRuleMapper.class);
 
@@ -403,12 +406,16 @@ class FareRuleServiceImplTest {
         Passenger student = givenPassenger(20); // Estudiante 20%
         Seat seat = givenSeat(Seat.Type.PREFERENTIAL); // +15%
         Bus bus = givenBus(40);
+        Trip trip = Trip.builder().id(1L).bus(bus).date(LocalDate.now().plusDays(12))
+                .route(route).status(Trip.Status.SCHEDULED).departureAt(OffsetDateTime.now().plusDays(1)).arrivalAt(OffsetDateTime.now().plusDays(1).plusHours(3))
+                .overbookingPercent(1.2).build();
 
         when(fareRuleRepository.findByRouteIdAndFromStopIdAndToStopId(1L, 1L, 2L))
                 .thenReturn(Optional.of(fareRule));
         when(passengerRepository.findById(1L)).thenReturn(Optional.of(student));
         when(seatRepository.findByBusIdAndNumber(1L, "A1")).thenReturn(Optional.of(seat));
         when(busRepository.findById(1L)).thenReturn(Optional.of(bus));
+        when(tripRepository.findById(1L)).thenReturn(Optional.of(trip));
         when(ticketRepository.countSoldByTrip(1L)).thenReturn(35L); // +20% dinámico
 
         // When

@@ -6,6 +6,8 @@ import com.unimag.bustransport.domain.repositories.*;
 import com.unimag.bustransport.exception.DuplicateResourceException;
 import com.unimag.bustransport.exception.InvalidCredentialsException;
 import com.unimag.bustransport.exception.NotFoundException;
+import com.unimag.bustransport.notification.NotificationHelper;
+import com.unimag.bustransport.services.ConfigService;
 import com.unimag.bustransport.services.mapper.TicketMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -40,6 +42,10 @@ class TicketServiceImplTest {
     private StopRepository stopRepository;
     @Mock
     private PurchaseRepository purchaseRepository;
+    @Mock
+    private ConfigService configService;
+    @Mock
+    private NotificationHelper notificationHelper;
     @Spy
     private TicketMapper ticketMapper = Mappers.getMapper(TicketMapper.class);
     @InjectMocks
@@ -337,6 +343,127 @@ class TicketServiceImplTest {
         assertThatThrownBy(() -> ticketService.validateQrForTicket("TICKET-ABC123"))
                 .isInstanceOf(InvalidCredentialsException.class)
                 .hasMessageContaining("El ticket no está activo (status: PENDING)");
+    }
+
+    @Test
+    @DisplayName("Debe hacer reembolso de ticket más de 24 horas antes del viaje")
+    void refundTicket_MoreThan24Hours_Success() {
+        // Given
+        Trip futureTrip = createTrip(1L, bus, route);
+        futureTrip.setDepartureAt(OffsetDateTime.now().plusDays(2)); // 48 horas
+        Ticket ticketToRefund = createTicket(1L, "5A", futureTrip, passenger, fromStop, toStop, purchase);
+        ticketToRefund.setStatus(Ticket.Status.SOLD);
+        ticketToRefund.setPrice(BigDecimal.valueOf(100000));
+        purchase.setTotalAmount(BigDecimal.valueOf(100000));
+
+        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticketToRefund));
+        when(configService.getValueAsBigDecimal("refund.>24")).thenReturn(BigDecimal.valueOf(0.9)); // 90%
+        when(purchaseRepository.save(any(Purchase.class))).thenReturn(purchase);
+        when(ticketRepository.save(any(Ticket.class))).thenReturn(ticketToRefund);
+
+        // When
+        ticketService.refundTicket(1L, 1L);
+
+        // Then
+        assertThat(ticketToRefund.getStatus()).isEqualTo(Ticket.Status.CANCELLED);
+        verify(configService).getValueAsBigDecimal("refund.>24");
+        verify(purchaseRepository).save(purchase);
+        verify(ticketRepository).save(ticketToRefund);
+        verify(notificationHelper).cancelTicket(any(Ticket.class), any());
+    }
+
+    @Test
+    @DisplayName("Debe hacer reembolso de ticket entre 2 y 24 horas antes del viaje")
+    void refundTicket_Between2And24Hours_Success() {
+        // Given
+        Trip futureTrip = createTrip(1L, bus, route);
+        futureTrip.setDepartureAt(OffsetDateTime.now().plusHours(12)); // 12 horas
+        Ticket ticketToRefund = createTicket(1L, "5A", futureTrip, passenger, fromStop, toStop, purchase);
+        ticketToRefund.setStatus(Ticket.Status.SOLD);
+        ticketToRefund.setPrice(BigDecimal.valueOf(100000));
+        purchase.setTotalAmount(BigDecimal.valueOf(100000));
+
+        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticketToRefund));
+        when(configService.getValueAsBigDecimal("refund.2to24")).thenReturn(BigDecimal.valueOf(0.5)); // 50%
+        when(purchaseRepository.save(any(Purchase.class))).thenReturn(purchase);
+        when(ticketRepository.save(any(Ticket.class))).thenReturn(ticketToRefund);
+
+        // When
+        ticketService.refundTicket(1L, 1L);
+
+        // Then
+        assertThat(ticketToRefund.getStatus()).isEqualTo(Ticket.Status.CANCELLED);
+        verify(configService).getValueAsBigDecimal("refund.2to24");
+        verify(purchaseRepository).save(purchase);
+        verify(ticketRepository).save(ticketToRefund);
+    }
+
+    @Test
+    @DisplayName("Debe hacer reembolso de ticket menos de 2 horas antes del viaje")
+    void refundTicket_LessThan2Hours_Success() {
+        // Given
+        Trip futureTrip = createTrip(1L, bus, route);
+        futureTrip.setDepartureAt(OffsetDateTime.now().plusMinutes(90)); // 1.5 horas
+        Ticket ticketToRefund = createTicket(1L, "5A", futureTrip, passenger, fromStop, toStop, purchase);
+        ticketToRefund.setStatus(Ticket.Status.SOLD);
+        ticketToRefund.setPrice(BigDecimal.valueOf(100000));
+        purchase.setTotalAmount(BigDecimal.valueOf(100000));
+
+        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticketToRefund));
+        when(configService.getValueAsBigDecimal("refund.<2")).thenReturn(BigDecimal.valueOf(0.0)); // 0%
+        when(purchaseRepository.save(any(Purchase.class))).thenReturn(purchase);
+        when(ticketRepository.save(any(Ticket.class))).thenReturn(ticketToRefund);
+
+        // When
+        ticketService.refundTicket(1L, 1L);
+
+        // Then
+        assertThat(ticketToRefund.getStatus()).isEqualTo(Ticket.Status.CANCELLED);
+        verify(configService).getValueAsBigDecimal("refund.<2");
+    }
+
+    @Test
+    @DisplayName("Debe fallar al hacer reembolso si el usuario no es el propietario")
+    void refundTicket_NotOwner_ShouldFail() {
+        // Given
+        Ticket ticketToRefund = createTicket(1L, "5A", trip, passenger, fromStop, toStop, purchase);
+        ticketToRefund.setStatus(Ticket.Status.SOLD);
+
+        when(ticketRepository.findById(1L)).thenReturn(Optional.of(ticketToRefund));
+
+        // When & Then
+        assertThatThrownBy(() -> ticketService.refundTicket(1L, 999L)) // userId diferente
+                .isInstanceOf(InvalidCredentialsException.class)
+                .hasMessageContaining("You can´t refund this Ticket");
+
+        verify(ticketRepository, never()).save(any());
+        verify(purchaseRepository, never()).save(any());
+    }
+
+    @Test
+    @DisplayName("Debe procesar no-shows correctamente")
+    void processNoshows_ShouldMarkTicketsAsNoShow() {
+        // Given
+        Trip departingTrip = createTrip(1L, bus, route);
+        departingTrip.setDepartureAt(OffsetDateTime.now().plusMinutes(3)); // Sale en 3 minutos
+
+        Ticket ticket1 = createTicket(1L, "1A", departingTrip, passenger, fromStop, toStop, purchase);
+        Ticket ticket2 = createTicket(2L, "1B", departingTrip, passenger, fromStop, toStop, purchase);
+        ticket1.setStatus(Ticket.Status.SOLD);
+        ticket2.setStatus(Ticket.Status.SOLD);
+
+        when(ticketRepository.findTicketNoShow(any(OffsetDateTime.class)))
+                .thenReturn(List.of(ticket1, ticket2));
+        when(ticketRepository.save(any(Ticket.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        // When
+        ticketService.processNoshows();
+
+        // Then
+        assertThat(ticket1.getStatus()).isEqualTo(Ticket.Status.NO_SHOW);
+        assertThat(ticket2.getStatus()).isEqualTo(Ticket.Status.NO_SHOW);
+        verify(ticketRepository).findTicketNoShow(any(OffsetDateTime.class));
+        verify(ticketRepository, times(2)).save(any(Ticket.class));
     }
     @Test
     @DisplayName("Debe limpiar tickets PENDING expirados exitosamente")

@@ -2,12 +2,14 @@ package com.unimag.bustransport.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unimag.bustransport.api.dto.UserDtos.*;
+import com.unimag.bustransport.config.TestSecurityConfig;
 import com.unimag.bustransport.domain.entities.Role;
 import com.unimag.bustransport.exception.NotFoundException;
 import com.unimag.bustransport.services.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -23,28 +25,13 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(UserController.class)
+@Import(TestSecurityConfig.class)
 class UserControllerTest {
 
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
     @MockitoBean UserService service;
 
-    @Test
-    void register_shouldReturn201AndLocation() throws Exception {
-        var req = new UserCreateRequest("robert@gmail.com", "password123", "Robert Martínez", "+573001234567");
-        var resp = userResponse(1L, "robert@gmail.com", "Robert Martínez", "+573001234567", Role.ROLE_PASSENGER);
-
-        when(service.registerUser(any())).thenReturn(resp);
-
-        mvc.perform(post("/api/v1/users/register")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(om.writeValueAsString(req)))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", org.hamcrest.Matchers.endsWith("/api/v1/users/1")))
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.email").value("robert@gmail.com"))
-                .andExpect(jsonPath("$.name").value("Robert Martínez"));
-    }
 
     @Test
     void createEmployee_shouldReturn201() throws Exception {
@@ -61,19 +48,6 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.email").value("julian.driver@bustransport.com"));
     }
 
-    @Test
-    void login_shouldReturn200() throws Exception {
-        var resp = userResponse(5L, "jose@gmail.com", "Jose García", "+573201234567", Role.ROLE_PASSENGER);
-
-        when(service.login("jose@gmail.com", "pass123")).thenReturn(resp);
-
-        mvc.perform(post("/api/v1/users/login")
-                        .param("email", "jose@gmail.com")
-                        .param("password", "pass123"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(5))
-                .andExpect(jsonPath("$.email").value("jose@gmail.com"));
-    }
 
     @Test
     void get_shouldReturn200() throws Exception {

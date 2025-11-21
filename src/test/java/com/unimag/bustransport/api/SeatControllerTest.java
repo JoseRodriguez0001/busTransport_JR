@@ -2,11 +2,13 @@ package com.unimag.bustransport.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.unimag.bustransport.api.dto.SeatDtos.*;
+import com.unimag.bustransport.config.TestSecurityConfig;
 import com.unimag.bustransport.domain.entities.Seat;
 import com.unimag.bustransport.services.SeatService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,6 +23,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(SeatController.class)
+@Import(TestSecurityConfig.class)
 class SeatControllerTest {
 
     @Autowired MockMvc mvc;

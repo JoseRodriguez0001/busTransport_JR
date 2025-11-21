@@ -23,15 +23,6 @@ public class UserController {
 
     private final UserService service;
 
-    @PostMapping("/register")
-    public ResponseEntity<UserResponse> register(@Valid @RequestBody UserCreateRequest req,
-                                                 UriComponentsBuilder uriBuilder) {
-        var userCreated = service.registerUser(req);
-        var location = uriBuilder.path("/api/v1/users/{id}")
-                .buildAndExpand(userCreated.id())
-                .toUri();
-        return ResponseEntity.created(location).body(userCreated);
-    }
 
     @PostMapping("/employees")
     public ResponseEntity<UserResponse> createEmployee(@Valid @RequestBody EmployeeCreateRequest req,
@@ -43,11 +34,6 @@ public class UserController {
         return ResponseEntity.created(location).body(employeeCreated);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<UserResponse> login(@RequestParam String email,
-                                              @RequestParam String password) {
-        return ResponseEntity.ok(service.login(email, password));
-    }
 
     @GetMapping("/{id}")
     public ResponseEntity<UserResponse> get(@PathVariable Long id) {

@@ -20,15 +20,23 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
 
     @Query("SELECT COUNT(t) FROM Ticket t WHERE t.trip.id = :tripId AND t.status = com.unimag.bustransport.domain.entities.Ticket.Status.SOLD")
     long countSoldByTrip(@Param("tripId") Long tripId);
-    @Query("SELECT COUNT(t) " +
-            "FROM Ticket t " +
-            "WHERE t.trip.id = :tripId AND t.seatNumber= :seatNumber " +
-            "                          AND t.status = (com.unimag.bustransport.domain.entities.Ticket.Status.SOLD) " +
-            "                          AND (t.fromStop.order< :toIndex AND t.toStop.order> :fromIndex)")
-    long countSeatOcuppyBetweenStops( @Param("tripId") Long tripId,
-                                      @Param("fromIndex") Integer fromIndex,
-                                      @Param("toIndex") Integer toIndex,
-                                      @Param("seatNumber") String seatNumber);
+    @Query("""
+    SELECT COUNT(t)
+    FROM Ticket t
+    WHERE t.trip.id = :tripId
+      AND t.seatNumber = :seatNumber
+      AND t.status IN (
+            com.unimag.bustransport.domain.entities.Ticket.Status.SOLD,
+            com.unimag.bustransport.domain.entities.Ticket.Status.BOARDED
+      )
+      AND (t.fromStop.order < :toIndex AND t.toStop.order > :fromIndex)
+""")
+    long countSeatOcuppyBetweenStops(
+            @Param("tripId") Long tripId,
+            @Param("fromIndex") Integer fromIndex,
+            @Param("toIndex") Integer toIndex,
+            @Param("seatNumber") String seatNumber
+    );
 
     // Verificar si un asiento ya está vendido en un trip
     boolean existsByTripIdAndSeatNumberAndStatus(
@@ -62,4 +70,13 @@ public interface TicketRepository extends JpaRepository<Ticket,Long> {
             "AND t.purchase.paymentStatus = com.unimag.bustransport.domain.entities.Purchase.PaymentStatus.PENDING " +
             "AND t.purchase.createdAt < :cutoffTime")
     List<Ticket> findExpiredPendingTickets(@Param("cutoffTime") OffsetDateTime cutoffTime);
+    @Query("""
+    SELECT t FROM Ticket t
+    WHERE t.trip.id = :tripId 
+      AND t.status = com.unimag.bustransport.domain.entities.Ticket.Status.SOLD
+      AND t.trip.departureAt BETWEEN CURRENT_TIMESTAMP AND :thresholdTime
+    """)
+    List<Ticket> findTicketNoShow(@Param("thresholdTime") OffsetDateTime thresholdTime);
+
+    List<Ticket> tripId(Long tripId);
 }
